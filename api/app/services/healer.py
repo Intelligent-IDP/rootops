@@ -185,7 +185,7 @@ async def diagnose(session: AsyncSession, service_name: str | None = None) -> li
         if log_entry.embedding is None:
             continue
 
-        embedding_str = "[" + ",".join(str(v) for v in log_entry.embedding.tolist()) + "]"
+        embedding_str = "[" + ",".join(str(v) for v in log_entry.embedding.to_list()) + "]"
 
         code_sql = text("""
             SELECT
