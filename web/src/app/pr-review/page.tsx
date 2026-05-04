@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { PageHeader, Card, Button, StatusBadge, EmptyState, SectionTitle } from "@/components/ui";
 import { SimilarityBar, RiskScoreBar } from "@/components/charts";
+import { Markdown } from "@/lib/markdown";
 import {
   getPRList,
   getPRDiff,
@@ -176,8 +177,8 @@ export default function PRReviewPage() {
               <Card key={label}>
                 <div className="text-[13px] font-semibold text-text-bright mb-3">{label}</div>
                 {res.answer && (
-                  <div className="text-[12.5px] text-text-muted mb-4 whitespace-pre-wrap leading-relaxed">
-                    {res.answer}
+                  <div className="mb-4">
+                    <Markdown>{res.answer}</Markdown>
                   </div>
                 )}
                 {res.sources && res.sources.length > 0 && (

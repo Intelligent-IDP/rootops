@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { PageHeader, Card, Button, EmptyState, SectionTitle } from "@/components/ui";
+import { Markdown } from "@/lib/markdown";
 import {
   getHealth,
   getLogStats,
@@ -164,9 +165,7 @@ export default function AutoHealPage() {
                     <div className="text-[10px] font-bold uppercase tracking-widest text-text-dim mb-2">
                       Root Cause & Fix
                     </div>
-                    <div className="text-[12.5px] text-text-muted leading-relaxed whitespace-pre-wrap">
-                      {fix.diagnosis}
-                    </div>
+                    <Markdown>{fix.diagnosis}</Markdown>
                   </div>
                 )}
 
