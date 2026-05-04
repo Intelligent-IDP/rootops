@@ -41,3 +41,4 @@ models_cache/
 
 # OS
 Thumbs.db
+deploy/cloud/
