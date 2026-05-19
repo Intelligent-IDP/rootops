@@ -16,7 +16,7 @@ pydantic-settings==2.7.1
 alembic==1.14.1
 
 # Utilities
-python-dotenv==1.0.1
+python-dotenv==1.2.2
 
 # ── RAG Pipeline ─────────────────────────────────────────────────
 
@@ -24,7 +24,7 @@ python-dotenv==1.0.1
 sentence-transformers>=3.0.0
 
 # Git repository access
-gitpython>=3.1.0
+gitpython>=3.1.47
 
 # Async HTTP (for Ollama + general HTTP calls)
 httpx>=0.27.0,<0.28.0
