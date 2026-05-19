@@ -16,7 +16,7 @@ pydantic-settings==2.7.1
 alembic==1.14.1
 
 # Utilities
-python-dotenv==1.0.1
+python-dotenv==1.2.2
 
 # ── RAG Pipeline ─────────────────────────────────────────────────
 
