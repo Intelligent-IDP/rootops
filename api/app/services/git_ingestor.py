@@ -343,18 +343,19 @@ async def ingest_repository(
         logger.info("Dependency extraction disabled (DISABLE_DEP_EXTRACTION=true) — skipping")
     else:
         try:
-            from app.services.dep_extractor import extract_and_persist_dependencies
-            dep_count = await extract_and_persist_dependencies(
+            dep_count = await _extract_dependency_graph(
                 session,
-                source_repo_id=repo_id,
-                source_repo_name=repo_name,
+                repo_id=repo_id,
+                repo_name=repo_name,
+                repo_path=repo_path,
                 file_contents=file_contents_for_deps,
             )
             await session.commit()
             stats["dependencies_found"] = dep_count
-            logger.info("Dependency extraction complete: %d patterns", dep_count)
+            logger.info("Dependency extraction complete: %d dependencies", dep_count)
         except Exception:
-            logger.warning("Dependency extraction failed — ingestion still succeeded")
+            await session.rollback()
+            logger.warning("Dependency extraction failed — ingestion still succeeded", exc_info=True)
 
     # Free large in-memory structures before calling the LLM (which
     # causes Ollama to load the model into RAM).
@@ -465,3 +466,43 @@ def _walk_tree(tree):
     for item in tree.traverse():
         if item.type == "blob":
             yield item
+
+
+async def _extract_dependency_graph(
+    session: AsyncSession,
+    *,
+    repo_id: uuid.UUID,
+    repo_name: str,
+    repo_path: str,
+    file_contents: list[tuple[str, str]],
+) -> int:
+    """Build the dependency graph with Breadth, falling back to regex.
+
+    DEP_GRAPH_SOURCE picks the extractor: "breadth", "regex" or "auto".
+    Returns the number of dependency rows written.
+    """
+    source = settings.DEP_GRAPH_SOURCE.lower().strip()
+    if source in ("breadth", "auto"):
+        from app.services.breadth_graph import import_flowgraph, scan_repository
+
+        flowgraph = await scan_repository(repo_path)
+        if flowgraph is not None:
+            result = await import_flowgraph(
+                session, flowgraph, repo_id=repo_id, repo_name=repo_name,
+            )
+            return result["dependencies"]
+        if source == "breadth":
+            raise RuntimeError(
+                "DEP_GRAPH_SOURCE=breadth but Breadth is not installed or the scan failed "
+                f"(BREADTH_BIN={settings.BREADTH_BIN!r})"
+            )
+        logger.info("Breadth not available — using the regex dependency extractor")
+
+    from app.services.dep_extractor import extract_and_persist_dependencies
+
+    return await extract_and_persist_dependencies(
+        session,
+        source_repo_id=repo_id,
+        source_repo_name=repo_name,
+        file_contents=file_contents,
+    )

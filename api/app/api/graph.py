@@ -7,7 +7,7 @@ Includes causation confirmation and entity alias management.
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from pydantic import BaseModel
 
 from app.db import get_db
@@ -271,3 +271,36 @@ async def ingest_deployment_event(body: DeploymentEvent, session=Depends(get_db)
         "environment": body.environment,
         "entity": entity.to_dict(),
     }
+
+
+# ── Breadth flowgraph import ──────────────────────────────────────
+
+@router.post("/breadth")
+async def import_breadth_flowgraph(
+    repo: str = Query(..., description="Repository name the graph was scanned from"),
+    flowgraph: dict = Body(..., description="A Breadth flowgraph.json (version 1.0)"),
+    session=Depends(get_db),
+):
+    """
+    Import a Breadth flowgraph produced outside RootOps, for example by
+    `breadth scan .` on a laptop or by the Breadth GitHub Action.
+
+    Replaces this repository's previous structural edges and dependency rows.
+    """
+    from sqlalchemy import func, select
+    from app.models.repository import Repository
+    from app.services.breadth_graph import import_flowgraph
+
+    row = (await session.execute(
+        select(Repository).where(func.lower(Repository.name) == repo.lower())
+    )).scalar_one_or_none()
+    try:
+        stats = await import_flowgraph(
+            session, flowgraph,
+            repo_id=row.id if row else None,
+            repo_name=row.name if row else repo,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    await session.commit()
+    return {"status": "imported", "repo": repo, "repo_registered": row is not None, **stats}

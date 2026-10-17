@@ -1,0 +1,2145 @@
+{
+ "version": "1.0",
+ "nodes": [
+  {
+   "id": "code:repo:shop",
+   "name": "shop",
+   "kind": "system",
+   "layer": "code"
+  },
+  {
+   "id": "code:dir:services",
+   "name": "services/",
+   "kind": "module",
+   "layer": "code",
+   "parent": "code:repo:shop"
+  },
+  {
+   "id": "code:dir:services/gateway/src",
+   "name": "gateway",
+   "kind": "service",
+   "layer": "code",
+   "parent": "code:dir:services",
+   "aliases": [
+    "k8s:shop/Deployment/gateway",
+    "service:gateway"
+   ]
+  },
+  {
+   "id": "code:dir:services/gateway/src/clients",
+   "name": "clients/",
+   "kind": "module",
+   "layer": "code",
+   "parent": "code:dir:services/gateway/src"
+  },
+  {
+   "id": "code:dir:services/gateway/src/routes",
+   "name": "routes/",
+   "kind": "module",
+   "layer": "code",
+   "parent": "code:dir:services/gateway/src"
+  },
+  {
+   "id": "code:dir:services/notifier/src",
+   "name": "notifier",
+   "kind": "service",
+   "layer": "code",
+   "parent": "code:dir:services",
+   "aliases": [
+    "k8s:shop/Deployment/notifier",
+    "service:notifier"
+   ]
+  },
+  {
+   "id": "code:dir:services/orders/app",
+   "name": "orders",
+   "kind": "service",
+   "layer": "code",
+   "parent": "code:dir:services",
+   "aliases": [
+    "k8s:shop/Deployment/orders",
+    "service:orders"
+   ]
+  },
+  {
+   "id": "code:dir:services/payments/app",
+   "name": "payments",
+   "kind": "service",
+   "layer": "code",
+   "parent": "code:dir:services",
+   "aliases": [
+    "k8s:shop/Deployment/payments",
+    "service:payments"
+   ]
+  },
+  {
+   "id": "code:file:services/gateway/src/clients/orders.ts",
+   "name": "orders.ts",
+   "kind": "module",
+   "layer": "code",
+   "parent": "code:dir:services/gateway/src/clients"
+  },
+  {
+   "id": "code:fn:services/gateway/src/clients/orders.ts#OrdersClient",
+   "name": "OrdersClient",
+   "kind": "module",
+   "layer": "code",
+   "parent": "code:file:services/gateway/src/clients/orders.ts",
+   "aliases": [
+    "src:services/gateway/src/clients/orders.ts#OrdersClient"
+   ]
+  },
+  {
+   "id": "code:fn:services/gateway/src/clients/orders.ts#OrdersClient.createOrder",
+   "name": "createOrder",
+   "kind": "function",
+   "layer": "code",
+   "parent": "code:fn:services/gateway/src/clients/orders.ts#OrdersClient",
+   "aliases": [
+    "src:services/gateway/src/clients/orders.ts#OrdersClient.createOrder"
+   ]
+  },
+  {
+   "id": "code:fn:services/gateway/src/clients/orders.ts#OrdersClient.getOrder",
+   "name": "getOrder",
+   "kind": "function",
+   "layer": "code",
+   "parent": "code:fn:services/gateway/src/clients/orders.ts#OrdersClient",
+   "aliases": [
+    "src:services/gateway/src/clients/orders.ts#OrdersClient.getOrder"
+   ]
+  },
+  {
+   "id": "code:file:services/gateway/src/routes/checkout.ts",
+   "name": "checkout.ts",
+   "kind": "module",
+   "layer": "code",
+   "parent": "code:dir:services/gateway/src/routes"
+  },
+  {
+   "id": "code:fn:services/gateway/src/routes/checkout.ts#checkout",
+   "name": "checkout",
+   "kind": "function",
+   "layer": "code",
+   "parent": "code:file:services/gateway/src/routes/checkout.ts",
+   "aliases": [
+    "src:services/gateway/src/routes/checkout.ts#checkout"
+   ]
+  },
+  {
+   "id": "code:fn:services/gateway/src/routes/checkout.ts#validateCart",
+   "name": "validateCart",
+   "kind": "function",
+   "layer": "code",
+   "parent": "code:file:services/gateway/src/routes/checkout.ts",
+   "aliases": [
+    "src:services/gateway/src/routes/checkout.ts#validateCart"
+   ]
+  },
+  {
+   "id": "code:file:services/gateway/src/routes/orders.ts",
+   "name": "orders.ts",
+   "kind": "module",
+   "layer": "code",
+   "parent": "code:dir:services/gateway/src/routes"
+  },
+  {
+   "id": "code:fn:services/gateway/src/routes/orders.ts#getOrder",
+   "name": "getOrder",
+   "kind": "function",
+   "layer": "code",
+   "parent": "code:file:services/gateway/src/routes/orders.ts",
+   "aliases": [
+    "src:services/gateway/src/routes/orders.ts#getOrder"
+   ]
+  },
+  {
+   "id": "code:file:services/gateway/src/server.ts",
+   "name": "server.ts",
+   "kind": "module",
+   "layer": "code",
+   "parent": "code:dir:services/gateway/src"
+  },
+  {
+   "id": "code:fn:services/gateway/src/server.ts#start",
+   "name": "start",
+   "kind": "function",
+   "layer": "code",
+   "parent": "code:file:services/gateway/src/server.ts",
+   "aliases": [
+    "src:services/gateway/src/server.ts#start"
+   ]
+  },
+  {
+   "id": "code:file:services/notifier/src/consumer.ts",
+   "name": "consumer.ts",
+   "kind": "module",
+   "layer": "code",
+   "parent": "code:dir:services/notifier/src"
+  },
+  {
+   "id": "code:fn:services/notifier/src/consumer.ts#run",
+   "name": "run",
+   "kind": "function",
+   "layer": "code",
+   "parent": "code:file:services/notifier/src/consumer.ts",
+   "aliases": [
+    "src:services/notifier/src/consumer.ts#run"
+   ]
+  },
+  {
+   "id": "code:fn:services/notifier/src/consumer.ts#handleOrderCreated",
+   "name": "handleOrderCreated",
+   "kind": "function",
+   "layer": "code",
+   "parent": "code:file:services/notifier/src/consumer.ts",
+   "aliases": [
+    "src:services/notifier/src/consumer.ts#handleOrderCreated"
+   ]
+  },
+  {
+   "id": "code:file:services/notifier/src/email.ts",
+   "name": "email.ts",
+   "kind": "module",
+   "layer": "code",
+   "parent": "code:dir:services/notifier/src"
+  },
+  {
+   "id": "code:fn:services/notifier/src/email.ts#sendConfirmation",
+   "name": "sendConfirmation",
+   "kind": "function",
+   "layer": "code",
+   "parent": "code:file:services/notifier/src/email.ts",
+   "aliases": [
+    "src:services/notifier/src/email.ts#sendConfirmation"
+   ]
+  },
+  {
+   "id": "code:file:services/orders/app/__init__.py",
+   "name": "__init__.py",
+   "kind": "module",
+   "layer": "code",
+   "parent": "code:dir:services/orders/app"
+  },
+  {
+   "id": "code:file:services/orders/app/events.py",
+   "name": "events.py",
+   "kind": "module",
+   "layer": "code",
+   "parent": "code:dir:services/orders/app"
+  },
+  {
+   "id": "code:fn:services/orders/app/events.py#order_created",
+   "name": "order_created",
+   "kind": "function",
+   "layer": "code",
+   "parent": "code:file:services/orders/app/events.py",
+   "aliases": [
+    "py:services.orders.app.events.order_created",
+    "src:services/orders/app/events.py#order_created"
+   ]
+  },
+  {
+   "id": "code:file:services/orders/app/main.py",
+   "name": "main.py",
+   "kind": "module",
+   "layer": "code",
+   "parent": "code:dir:services/orders/app"
+  },
+  {
+   "id": "code:fn:services/orders/app/main.py#create_order",
+   "name": "create_order",
+   "kind": "function",
+   "layer": "code",
+   "parent": "code:file:services/orders/app/main.py",
+   "aliases": [
+    "py:services.orders.app.main.create_order",
+    "src:services/orders/app/main.py#create_order"
+   ]
+  },
+  {
+   "id": "code:fn:services/orders/app/main.py#get_order",
+   "name": "get_order",
+   "kind": "function",
+   "layer": "code",
+   "parent": "code:file:services/orders/app/main.py",
+   "aliases": [
+    "py:services.orders.app.main.get_order",
+    "src:services/orders/app/main.py#get_order"
+   ]
+  },
+  {
+   "id": "code:file:services/orders/app/models.py",
+   "name": "models.py",
+   "kind": "module",
+   "layer": "code",
+   "parent": "code:dir:services/orders/app"
+  },
+  {
+   "id": "code:fn:services/orders/app/models.py#Item",
+   "name": "Item",
+   "kind": "module",
+   "layer": "code",
+   "parent": "code:file:services/orders/app/models.py",
+   "aliases": [
+    "py:services.orders.app.models.Item",
+    "src:services/orders/app/models.py#Item"
+   ]
+  },
+  {
+   "id": "code:fn:services/orders/app/models.py#OrderRequest",
+   "name": "OrderRequest",
+   "kind": "module",
+   "layer": "code",
+   "parent": "code:file:services/orders/app/models.py",
+   "aliases": [
+    "py:services.orders.app.models.OrderRequest",
+    "src:services/orders/app/models.py#OrderRequest"
+   ]
+  },
+  {
+   "id": "code:fn:services/orders/app/models.py#Order",
+   "name": "Order",
+   "kind": "module",
+   "layer": "code",
+   "parent": "code:file:services/orders/app/models.py",
+   "aliases": [
+    "py:services.orders.app.models.Order",
+    "src:services/orders/app/models.py#Order"
+   ]
+  },
+  {
+   "id": "code:file:services/orders/app/payments.py",
+   "name": "payments.py",
+   "kind": "module",
+   "layer": "code",
+   "parent": "code:dir:services/orders/app"
+  },
+  {
+   "id": "code:fn:services/orders/app/payments.py#charge",
+   "name": "charge",
+   "kind": "function",
+   "layer": "code",
+   "parent": "code:file:services/orders/app/payments.py",
+   "aliases": [
+    "py:services.orders.app.payments.charge",
+    "src:services/orders/app/payments.py#charge"
+   ]
+  },
+  {
+   "id": "code:file:services/orders/app/pricing.py",
+   "name": "pricing.py",
+   "kind": "module",
+   "layer": "code",
+   "parent": "code:dir:services/orders/app"
+  },
+  {
+   "id": "code:fn:services/orders/app/pricing.py#get_price",
+   "name": "get_price",
+   "kind": "function",
+   "layer": "code",
+   "parent": "code:file:services/orders/app/pricing.py",
+   "aliases": [
+    "py:services.orders.app.pricing.get_price",
+    "src:services/orders/app/pricing.py#get_price"
+   ]
+  },
+  {
+   "id": "code:fn:services/orders/app/pricing.py#invalidate_prices",
+   "name": "invalidate_prices",
+   "kind": "function",
+   "layer": "code",
+   "parent": "code:file:services/orders/app/pricing.py",
+   "aliases": [
+    "py:services.orders.app.pricing.invalidate_prices",
+    "src:services/orders/app/pricing.py#invalidate_prices"
+   ]
+  },
+  {
+   "id": "code:fn:services/orders/app/pricing.py#apply_discounts",
+   "name": "apply_discounts",
+   "kind": "function",
+   "layer": "code",
+   "parent": "code:file:services/orders/app/pricing.py",
+   "aliases": [
+    "py:services.orders.app.pricing.apply_discounts",
+    "src:services/orders/app/pricing.py#apply_discounts"
+   ]
+  },
+  {
+   "id": "code:fn:services/orders/app/pricing.py#validate_items",
+   "name": "validate_items",
+   "kind": "function",
+   "layer": "code",
+   "parent": "code:file:services/orders/app/pricing.py",
+   "aliases": [
+    "py:services.orders.app.pricing.validate_items",
+    "src:services/orders/app/pricing.py#validate_items"
+   ]
+  },
+  {
+   "id": "code:fn:services/orders/app/pricing.py#price_order",
+   "name": "price_order",
+   "kind": "function",
+   "layer": "code",
+   "parent": "code:file:services/orders/app/pricing.py",
+   "aliases": [
+    "py:services.orders.app.pricing.price_order",
+    "src:services/orders/app/pricing.py#price_order"
+   ]
+  },
+  {
+   "id": "code:fn:services/orders/app/pricing.py#legacy_discount",
+   "name": "legacy_discount",
+   "kind": "function",
+   "layer": "code",
+   "parent": "code:file:services/orders/app/pricing.py",
+   "aliases": [
+    "py:services.orders.app.pricing.legacy_discount",
+    "src:services/orders/app/pricing.py#legacy_discount"
+   ]
+  },
+  {
+   "id": "code:file:services/orders/app/repository.py",
+   "name": "repository.py",
+   "kind": "module",
+   "layer": "code",
+   "parent": "code:dir:services/orders/app"
+  },
+  {
+   "id": "code:fn:services/orders/app/repository.py#connection",
+   "name": "connection",
+   "kind": "function",
+   "layer": "code",
+   "parent": "code:file:services/orders/app/repository.py",
+   "aliases": [
+    "py:services.orders.app.repository.connection",
+    "src:services/orders/app/repository.py#connection"
+   ]
+  },
+  {
+   "id": "code:fn:services/orders/app/repository.py#next_id",
+   "name": "next_id",
+   "kind": "function",
+   "layer": "code",
+   "parent": "code:file:services/orders/app/repository.py",
+   "aliases": [
+    "py:services.orders.app.repository.next_id",
+    "src:services/orders/app/repository.py#next_id"
+   ]
+  },
+  {
+   "id": "code:fn:services/orders/app/repository.py#save_order",
+   "name": "save_order",
+   "kind": "function",
+   "layer": "code",
+   "parent": "code:file:services/orders/app/repository.py",
+   "aliases": [
+    "py:services.orders.app.repository.save_order",
+    "src:services/orders/app/repository.py#save_order"
+   ]
+  },
+  {
+   "id": "code:fn:services/orders/app/repository.py#load_order",
+   "name": "load_order",
+   "kind": "function",
+   "layer": "code",
+   "parent": "code:file:services/orders/app/repository.py",
+   "aliases": [
+    "py:services.orders.app.repository.load_order",
+    "src:services/orders/app/repository.py#load_order"
+   ]
+  },
+  {
+   "id": "code:fn:services/orders/app/repository.py#price_for",
+   "name": "price_for",
+   "kind": "function",
+   "layer": "code",
+   "parent": "code:file:services/orders/app/repository.py",
+   "aliases": [
+    "py:services.orders.app.repository.price_for",
+    "src:services/orders/app/repository.py#price_for"
+   ]
+  },
+  {
+   "id": "code:fn:services/orders/app/repository.py#fetch_customer",
+   "name": "fetch_customer",
+   "kind": "function",
+   "layer": "code",
+   "parent": "code:file:services/orders/app/repository.py",
+   "aliases": [
+    "py:services.orders.app.repository.fetch_customer",
+    "src:services/orders/app/repository.py#fetch_customer"
+   ]
+  },
+  {
+   "id": "code:file:services/payments/app/__init__.py",
+   "name": "__init__.py",
+   "kind": "module",
+   "layer": "code",
+   "parent": "code:dir:services/payments/app"
+  },
+  {
+   "id": "code:file:services/payments/app/audit.py",
+   "name": "audit.py",
+   "kind": "module",
+   "layer": "code",
+   "parent": "code:dir:services/payments/app"
+  },
+  {
+   "id": "code:fn:services/payments/app/audit.py#record",
+   "name": "record",
+   "kind": "function",
+   "layer": "code",
+   "parent": "code:file:services/payments/app/audit.py",
+   "aliases": [
+    "py:services.payments.app.audit.record",
+    "src:services/payments/app/audit.py#record"
+   ]
+  },
+  {
+   "id": "code:file:services/payments/app/fraud.py",
+   "name": "fraud.py",
+   "kind": "module",
+   "layer": "code",
+   "parent": "code:dir:services/payments/app"
+  },
+  {
+   "id": "code:fn:services/payments/app/fraud.py#risk_score",
+   "name": "risk_score",
+   "kind": "function",
+   "layer": "code",
+   "parent": "code:file:services/payments/app/fraud.py",
+   "aliases": [
+    "py:services.payments.app.fraud.risk_score",
+    "src:services/payments/app/fraud.py#risk_score"
+   ]
+  },
+  {
+   "id": "code:fn:services/payments/app/fraud.py#check_lines",
+   "name": "check_lines",
+   "kind": "function",
+   "layer": "code",
+   "parent": "code:file:services/payments/app/fraud.py",
+   "aliases": [
+    "py:services.payments.app.fraud.check_lines",
+    "src:services/payments/app/fraud.py#check_lines"
+   ]
+  },
+  {
+   "id": "code:file:services/payments/app/main.py",
+   "name": "main.py",
+   "kind": "module",
+   "layer": "code",
+   "parent": "code:dir:services/payments/app"
+  },
+  {
+   "id": "code:fn:services/payments/app/main.py#charge",
+   "name": "charge",
+   "kind": "function",
+   "layer": "code",
+   "parent": "code:file:services/payments/app/main.py",
+   "aliases": [
+    "py:services.payments.app.main.charge",
+    "src:services/payments/app/main.py#charge"
+   ]
+  },
+  {
+   "id": "code:file:services/payments/app/stripe_client.py",
+   "name": "stripe_client.py",
+   "kind": "module",
+   "layer": "code",
+   "parent": "code:dir:services/payments/app"
+  },
+  {
+   "id": "code:fn:services/payments/app/stripe_client.py#create_charge",
+   "name": "create_charge",
+   "kind": "function",
+   "layer": "code",
+   "parent": "code:file:services/payments/app/stripe_client.py",
+   "aliases": [
+    "py:services.payments.app.stripe_client.create_charge",
+    "src:services/payments/app/stripe_client.py#create_charge"
+   ]
+  },
+  {
+   "id": "route:services/gateway/src/server.ts#POST /checkout",
+   "name": "POST /checkout",
+   "kind": "network_endpoint",
+   "layer": "network",
+   "parent": "code:file:services/gateway/src/server.ts",
+   "aliases": [
+    "route:gateway:POST /checkout"
+   ]
+  },
+  {
+   "id": "route:services/gateway/src/server.ts#GET /orders/{}",
+   "name": "GET /orders/:id",
+   "kind": "network_endpoint",
+   "layer": "network",
+   "parent": "code:file:services/gateway/src/server.ts",
+   "aliases": [
+    "route:gateway:GET /orders/{}"
+   ]
+  },
+  {
+   "id": "route:services/orders/app/main.py#POST /orders",
+   "name": "POST /orders",
+   "kind": "network_endpoint",
+   "layer": "network",
+   "parent": "code:file:services/orders/app/main.py",
+   "aliases": [
+    "route:orders:POST /orders"
+   ]
+  },
+  {
+   "id": "route:services/orders/app/main.py#GET /orders/{}",
+   "name": "GET /orders/{order_id}",
+   "kind": "network_endpoint",
+   "layer": "network",
+   "parent": "code:file:services/orders/app/main.py",
+   "aliases": [
+    "route:orders:GET /orders/{}"
+   ]
+  },
+  {
+   "id": "route:services/payments/app/main.py#POST /charges",
+   "name": "POST /charges",
+   "kind": "network_endpoint",
+   "layer": "network",
+   "parent": "code:file:services/payments/app/main.py",
+   "aliases": [
+    "route:payments:POST /charges"
+   ]
+  },
+  {
+   "id": "code:external",
+   "name": "External packages",
+   "kind": "module",
+   "layer": "code",
+   "parent": "code:repo:shop"
+  },
+  {
+   "id": "code:pkg:express",
+   "name": "express",
+   "kind": "module",
+   "layer": "code",
+   "parent": "code:external"
+  },
+  {
+   "id": "queue:kafka",
+   "name": "kafka",
+   "kind": "queue",
+   "layer": "messaging",
+   "aliases": [
+    "tf:aws_msk_cluster.events"
+   ],
+   "parent": "tf:root:shop"
+  },
+  {
+   "id": "queue:kafka:order-created",
+   "name": "order-created",
+   "kind": "queue",
+   "layer": "messaging",
+   "parent": "queue:kafka",
+   "aliases": [
+    "topic:order-created"
+   ]
+  },
+  {
+   "id": "ext:http:api.sendgrid.com",
+   "name": "api.sendgrid.com",
+   "kind": "external_api",
+   "layer": "network",
+   "aliases": [
+    "host:api.sendgrid.com"
+   ]
+  },
+  {
+   "id": "code:pkg:fastapi",
+   "name": "fastapi",
+   "kind": "module",
+   "layer": "code",
+   "parent": "code:external"
+  },
+  {
+   "id": "code:global:services/orders/app/pricing.py#PRICE_CACHE",
+   "name": "PRICE_CACHE",
+   "kind": "datastore",
+   "layer": "code",
+   "parent": "code:file:services/orders/app/pricing.py"
+  },
+  {
+   "id": "store:postgresql",
+   "name": "postgresql",
+   "kind": "datastore",
+   "layer": "runtime",
+   "aliases": [
+    "datastore:postgresql",
+    "tf:aws_db_instance.orders"
+   ],
+   "parent": "tf:root:shop"
+  },
+  {
+   "id": "code:global:services/orders/app/repository.py#_conn",
+   "name": "_conn",
+   "kind": "datastore",
+   "layer": "code",
+   "parent": "code:file:services/orders/app/repository.py"
+  },
+  {
+   "id": "code:global:services/payments/app/fraud.py#BLOCKLIST",
+   "name": "BLOCKLIST",
+   "kind": "datastore",
+   "layer": "code",
+   "parent": "code:file:services/payments/app/fraud.py"
+  },
+  {
+   "id": "code:pkg:flask",
+   "name": "flask",
+   "kind": "module",
+   "layer": "code",
+   "parent": "code:external"
+  },
+  {
+   "id": "ext:http:api.stripe.com",
+   "name": "api.stripe.com",
+   "kind": "external_api",
+   "layer": "network",
+   "aliases": [
+    "host:api.stripe.com"
+   ]
+  },
+  {
+   "id": "tf:root:shop",
+   "name": "terraform: shop",
+   "kind": "system",
+   "layer": "infra"
+  },
+  {
+   "id": "tf:aws_security_group.lb",
+   "name": "shop-lb",
+   "kind": "infra_resource",
+   "layer": "network",
+   "parent": "tf:root:shop"
+  },
+  {
+   "id": "tf:aws_security_group.nodes",
+   "name": "shop-eks-nodes",
+   "kind": "infra_resource",
+   "layer": "network",
+   "parent": "tf:root:shop"
+  },
+  {
+   "id": "tf:aws_security_group.db",
+   "name": "shop-db",
+   "kind": "infra_resource",
+   "layer": "network",
+   "parent": "tf:root:shop"
+  },
+  {
+   "id": "tf:aws_security_group.kafka",
+   "name": "shop-kafka",
+   "kind": "infra_resource",
+   "layer": "network",
+   "parent": "tf:root:shop"
+  },
+  {
+   "id": "tf:aws_lb.public",
+   "name": "shop-public",
+   "kind": "network_endpoint",
+   "layer": "network",
+   "parent": "tf:root:shop"
+  },
+  {
+   "id": "tf:aws_lb_target_group.ingress",
+   "name": "shop-ingress",
+   "kind": "network_endpoint",
+   "layer": "network",
+   "parent": "tf:root:shop"
+  },
+  {
+   "id": "tf:aws_lb_listener.https",
+   "name": "aws_lb_listener.https",
+   "kind": "network_endpoint",
+   "layer": "network",
+   "parent": "tf:root:shop"
+  },
+  {
+   "id": "tf:aws_eks_cluster.shop",
+   "name": "shop",
+   "kind": "infra_resource",
+   "layer": "infra",
+   "parent": "tf:root:shop",
+   "aliases": [
+    "k8s:cluster"
+   ]
+  },
+  {
+   "id": "tf:aws_eks_node_group.default",
+   "name": "aws_eks_node_group.default",
+   "kind": "service",
+   "layer": "infra",
+   "parent": "tf:root:shop"
+  },
+  {
+   "id": "tf:aws_autoscaling_attachment.ingress",
+   "name": "aws_autoscaling_attachment.ingress",
+   "kind": "infra_resource",
+   "layer": "infra",
+   "parent": "tf:root:shop"
+  },
+  {
+   "id": "tf:aws_db_subnet_group.main",
+   "name": "shop-db",
+   "kind": "infra_resource",
+   "layer": "infra",
+   "parent": "tf:root:shop"
+  },
+  {
+   "id": "tf:aws_secretsmanager_secret.stripe",
+   "name": "shop/stripe-key",
+   "kind": "infra_resource",
+   "layer": "infra",
+   "parent": "tf:root:shop"
+  },
+  {
+   "id": "tf:aws_s3_bucket.invoices_legacy",
+   "name": "shop-invoices-legacy",
+   "kind": "datastore",
+   "layer": "infra",
+   "parent": "tf:root:shop"
+  },
+  {
+   "id": "tf:aws_sqs_queue.invoice_jobs",
+   "name": "shop-invoice-jobs",
+   "kind": "queue",
+   "layer": "messaging",
+   "parent": "tf:root:shop",
+   "aliases": [
+    "topic:shop-invoice-jobs"
+   ]
+  },
+  {
+   "id": "tf:module.network",
+   "name": "network",
+   "kind": "module",
+   "layer": "infra",
+   "parent": "tf:root:shop"
+  },
+  {
+   "id": "tf:module.network.aws_vpc.main",
+   "name": "aws_vpc.main",
+   "kind": "infra_resource",
+   "layer": "network",
+   "parent": "tf:module.network"
+  },
+  {
+   "id": "tf:module.network.aws_subnet.private_a",
+   "name": "aws_subnet.private_a",
+   "kind": "infra_resource",
+   "layer": "network",
+   "parent": "tf:module.network"
+  },
+  {
+   "id": "tf:module.network.aws_subnet.private_b",
+   "name": "aws_subnet.private_b",
+   "kind": "infra_resource",
+   "layer": "network",
+   "parent": "tf:module.network"
+  },
+  {
+   "id": "tf:module.network.aws_subnet.public_a",
+   "name": "aws_subnet.public_a",
+   "kind": "infra_resource",
+   "layer": "network",
+   "parent": "tf:module.network"
+  },
+  {
+   "id": "tf:module.network.aws_internet_gateway.igw",
+   "name": "aws_internet_gateway.igw",
+   "kind": "infra_resource",
+   "layer": "network",
+   "parent": "tf:module.network"
+  },
+  {
+   "id": "net:internet",
+   "name": "Internet",
+   "kind": "network_endpoint",
+   "layer": "network"
+  },
+  {
+   "id": "k8s:ns/shop",
+   "name": "shop",
+   "kind": "module",
+   "layer": "infra",
+   "parent": "tf:aws_eks_cluster.shop"
+  },
+  {
+   "id": "k8s:shop/ConfigMap/shop-config",
+   "name": "shop-config",
+   "parent": "k8s:ns/shop",
+   "kind": "infra_resource",
+   "layer": "infra"
+  },
+  {
+   "id": "k8s:shop/Secret/stripe",
+   "name": "stripe",
+   "parent": "k8s:ns/shop",
+   "kind": "infra_resource",
+   "layer": "infra"
+  },
+  {
+   "id": "k8s:shop/Service/gateway",
+   "name": "gateway",
+   "parent": "k8s:ns/shop",
+   "kind": "network_endpoint",
+   "layer": "network",
+   "aliases": [
+    "k8s-svc:gateway"
+   ]
+  },
+  {
+   "id": "k8s:shop/Service/orders",
+   "name": "orders",
+   "parent": "k8s:ns/shop",
+   "kind": "network_endpoint",
+   "layer": "network",
+   "aliases": [
+    "k8s-svc:orders"
+   ]
+  },
+  {
+   "id": "k8s:shop/Service/payments",
+   "name": "payments",
+   "parent": "k8s:ns/shop",
+   "kind": "network_endpoint",
+   "layer": "network",
+   "aliases": [
+    "k8s-svc:payments"
+   ]
+  },
+  {
+   "id": "k8s:shop/Ingress/shop",
+   "name": "shop",
+   "parent": "k8s:ns/shop",
+   "kind": "network_endpoint",
+   "layer": "network"
+  }
+ ],
+ "edges": [
+  {
+   "id": "call:route:services/gateway/src/server.ts#POST /checkout->code:fn:services/gateway/src/routes/checkout.ts#checkout",
+   "from": {
+    "node": "route:services/gateway/src/server.ts#POST /checkout"
+   },
+   "to": {
+    "node": "code:fn:services/gateway/src/routes/checkout.ts#checkout"
+   },
+   "kind": "call",
+   "count": 1,
+   "protocol": "http",
+   "metadata": {
+    "file": "services/gateway/src/server.ts"
+   }
+  },
+  {
+   "id": "call:route:services/gateway/src/server.ts#GET /orders/{}->code:fn:services/gateway/src/routes/orders.ts#getOrder",
+   "from": {
+    "node": "route:services/gateway/src/server.ts#GET /orders/{}"
+   },
+   "to": {
+    "node": "code:fn:services/gateway/src/routes/orders.ts#getOrder"
+   },
+   "kind": "call",
+   "count": 1,
+   "protocol": "http",
+   "metadata": {
+    "file": "services/gateway/src/server.ts"
+   }
+  },
+  {
+   "id": "call:route:services/orders/app/main.py#POST /orders->code:fn:services/orders/app/main.py#create_order",
+   "from": {
+    "node": "route:services/orders/app/main.py#POST /orders"
+   },
+   "to": {
+    "node": "code:fn:services/orders/app/main.py#create_order"
+   },
+   "kind": "call",
+   "count": 1,
+   "protocol": "http",
+   "metadata": {
+    "file": "services/orders/app/main.py"
+   }
+  },
+  {
+   "id": "call:route:services/orders/app/main.py#GET /orders/{}->code:fn:services/orders/app/main.py#get_order",
+   "from": {
+    "node": "route:services/orders/app/main.py#GET /orders/{}"
+   },
+   "to": {
+    "node": "code:fn:services/orders/app/main.py#get_order"
+   },
+   "kind": "call",
+   "count": 1,
+   "protocol": "http",
+   "metadata": {
+    "file": "services/orders/app/main.py"
+   }
+  },
+  {
+   "id": "call:route:services/payments/app/main.py#POST /charges->code:fn:services/payments/app/main.py#charge",
+   "from": {
+    "node": "route:services/payments/app/main.py#POST /charges"
+   },
+   "to": {
+    "node": "code:fn:services/payments/app/main.py#charge"
+   },
+   "kind": "call",
+   "count": 1,
+   "protocol": "http",
+   "metadata": {
+    "file": "services/payments/app/main.py"
+   }
+  },
+  {
+   "id": "call:code:fn:services/gateway/src/clients/orders.ts#OrdersClient.createOrder->code:fn:services/gateway/src/routes/checkout.ts#validateCart",
+   "from": {
+    "node": "code:fn:services/gateway/src/clients/orders.ts#OrdersClient.createOrder"
+   },
+   "to": {
+    "node": "code:fn:services/gateway/src/routes/checkout.ts#validateCart"
+   },
+   "kind": "call",
+   "count": 1,
+   "metadata": {
+    "file": "services/gateway/src/clients/orders.ts"
+   }
+  },
+  {
+   "id": "call:code:fn:services/gateway/src/clients/orders.ts#OrdersClient.createOrder->route:services/orders/app/main.py#POST /orders",
+   "from": {
+    "node": "code:fn:services/gateway/src/clients/orders.ts#OrdersClient.createOrder"
+   },
+   "to": {
+    "node": "route:services/orders/app/main.py#POST /orders"
+   },
+   "kind": "call",
+   "count": 1,
+   "protocol": "http",
+   "label": "POST /orders",
+   "metadata": {
+    "file": "services/gateway/src/clients/orders.ts"
+   }
+  },
+  {
+   "id": "call:code:fn:services/gateway/src/clients/orders.ts#OrdersClient.getOrder->route:services/orders/app/main.py#GET /orders/{}",
+   "from": {
+    "node": "code:fn:services/gateway/src/clients/orders.ts#OrdersClient.getOrder"
+   },
+   "to": {
+    "node": "route:services/orders/app/main.py#GET /orders/{}"
+   },
+   "kind": "call",
+   "count": 1,
+   "protocol": "http",
+   "label": "GET /orders/{id}",
+   "metadata": {
+    "file": "services/gateway/src/clients/orders.ts"
+   }
+  },
+  {
+   "id": "call:code:file:services/gateway/src/routes/checkout.ts->code:fn:services/gateway/src/clients/orders.ts#OrdersClient",
+   "from": {
+    "node": "code:file:services/gateway/src/routes/checkout.ts"
+   },
+   "to": {
+    "node": "code:fn:services/gateway/src/clients/orders.ts#OrdersClient"
+   },
+   "kind": "call",
+   "count": 1,
+   "metadata": {
+    "file": "services/gateway/src/routes/checkout.ts"
+   }
+  },
+  {
+   "id": "call:code:fn:services/gateway/src/routes/checkout.ts#checkout->code:fn:services/gateway/src/routes/checkout.ts#validateCart",
+   "from": {
+    "node": "code:fn:services/gateway/src/routes/checkout.ts#checkout"
+   },
+   "to": {
+    "node": "code:fn:services/gateway/src/routes/checkout.ts#validateCart"
+   },
+   "kind": "call",
+   "count": 1,
+   "metadata": {
+    "file": "services/gateway/src/routes/checkout.ts"
+   }
+  },
+  {
+   "id": "call:code:fn:services/gateway/src/routes/checkout.ts#checkout->code:fn:services/gateway/src/clients/orders.ts#OrdersClient.createOrder",
+   "from": {
+    "node": "code:fn:services/gateway/src/routes/checkout.ts#checkout"
+   },
+   "to": {
+    "node": "code:fn:services/gateway/src/clients/orders.ts#OrdersClient.createOrder"
+   },
+   "kind": "call",
+   "count": 1,
+   "metadata": {
+    "file": "services/gateway/src/routes/checkout.ts"
+   }
+  },
+  {
+   "id": "call:code:file:services/gateway/src/routes/orders.ts->code:fn:services/gateway/src/clients/orders.ts#OrdersClient",
+   "from": {
+    "node": "code:file:services/gateway/src/routes/orders.ts"
+   },
+   "to": {
+    "node": "code:fn:services/gateway/src/clients/orders.ts#OrdersClient"
+   },
+   "kind": "call",
+   "count": 1,
+   "metadata": {
+    "file": "services/gateway/src/routes/orders.ts"
+   }
+  },
+  {
+   "id": "call:code:fn:services/gateway/src/routes/orders.ts#getOrder->code:fn:services/gateway/src/clients/orders.ts#OrdersClient.getOrder",
+   "from": {
+    "node": "code:fn:services/gateway/src/routes/orders.ts#getOrder"
+   },
+   "to": {
+    "node": "code:fn:services/gateway/src/clients/orders.ts#OrdersClient.getOrder"
+   },
+   "kind": "call",
+   "count": 1,
+   "metadata": {
+    "file": "services/gateway/src/routes/orders.ts"
+   }
+  },
+  {
+   "id": "call:code:file:services/gateway/src/server.ts->code:pkg:express",
+   "from": {
+    "node": "code:file:services/gateway/src/server.ts"
+   },
+   "to": {
+    "node": "code:pkg:express"
+   },
+   "kind": "call",
+   "count": 3,
+   "metadata": {
+    "file": "services/gateway/src/server.ts"
+   }
+  },
+  {
+   "id": "call:code:fn:services/gateway/src/server.ts#start->code:pkg:express",
+   "from": {
+    "node": "code:fn:services/gateway/src/server.ts#start"
+   },
+   "to": {
+    "node": "code:pkg:express"
+   },
+   "kind": "call",
+   "count": 1,
+   "label": "listen",
+   "metadata": {
+    "file": "services/gateway/src/server.ts"
+   }
+  },
+  {
+   "id": "event:queue:kafka:order-created->code:fn:services/notifier/src/consumer.ts#run",
+   "from": {
+    "node": "queue:kafka:order-created"
+   },
+   "to": {
+    "node": "code:fn:services/notifier/src/consumer.ts#run"
+   },
+   "kind": "event",
+   "count": 1,
+   "protocol": "kafka",
+   "label": "consume order-created",
+   "metadata": {
+    "file": "services/notifier/src/consumer.ts"
+   }
+  },
+  {
+   "id": "call:code:fn:services/notifier/src/consumer.ts#run->code:fn:services/notifier/src/consumer.ts#handleOrderCreated",
+   "from": {
+    "node": "code:fn:services/notifier/src/consumer.ts#run"
+   },
+   "to": {
+    "node": "code:fn:services/notifier/src/consumer.ts#handleOrderCreated"
+   },
+   "kind": "call",
+   "count": 1,
+   "metadata": {
+    "file": "services/notifier/src/consumer.ts"
+   }
+  },
+  {
+   "id": "call:code:fn:services/notifier/src/consumer.ts#handleOrderCreated->code:fn:services/notifier/src/email.ts#sendConfirmation",
+   "from": {
+    "node": "code:fn:services/notifier/src/consumer.ts#handleOrderCreated"
+   },
+   "to": {
+    "node": "code:fn:services/notifier/src/email.ts#sendConfirmation"
+   },
+   "kind": "call",
+   "count": 1,
+   "metadata": {
+    "file": "services/notifier/src/consumer.ts"
+   }
+  },
+  {
+   "id": "call:code:fn:services/notifier/src/email.ts#sendConfirmation->ext:http:api.sendgrid.com",
+   "from": {
+    "node": "code:fn:services/notifier/src/email.ts#sendConfirmation"
+   },
+   "to": {
+    "node": "ext:http:api.sendgrid.com"
+   },
+   "kind": "call",
+   "count": 1,
+   "protocol": "http",
+   "label": "POST /v3/mail/send",
+   "metadata": {
+    "file": "services/notifier/src/email.ts"
+   }
+  },
+  {
+   "id": "event:code:fn:services/orders/app/events.py#order_created->queue:kafka:order-created",
+   "from": {
+    "node": "code:fn:services/orders/app/events.py#order_created"
+   },
+   "to": {
+    "node": "queue:kafka:order-created"
+   },
+   "kind": "event",
+   "count": 1,
+   "protocol": "kafka",
+   "label": "publish order-created",
+   "metadata": {
+    "file": "services/orders/app/events.py"
+   }
+  },
+  {
+   "id": "call:code:file:services/orders/app/main.py->code:pkg:fastapi",
+   "from": {
+    "node": "code:file:services/orders/app/main.py"
+   },
+   "to": {
+    "node": "code:pkg:fastapi"
+   },
+   "kind": "call",
+   "count": 1,
+   "label": "FastAPI",
+   "metadata": {
+    "file": "services/orders/app/main.py"
+   }
+  },
+  {
+   "id": "call:code:fn:services/orders/app/main.py#create_order->code:fn:services/orders/app/repository.py#fetch_customer",
+   "from": {
+    "node": "code:fn:services/orders/app/main.py#create_order"
+   },
+   "to": {
+    "node": "code:fn:services/orders/app/repository.py#fetch_customer"
+   },
+   "kind": "call",
+   "count": 1,
+   "metadata": {
+    "file": "services/orders/app/main.py"
+   }
+  },
+  {
+   "id": "call:code:fn:services/orders/app/main.py#create_order->code:fn:services/orders/app/pricing.py#price_order",
+   "from": {
+    "node": "code:fn:services/orders/app/main.py#create_order"
+   },
+   "to": {
+    "node": "code:fn:services/orders/app/pricing.py#price_order"
+   },
+   "kind": "call",
+   "count": 1,
+   "metadata": {
+    "file": "services/orders/app/main.py"
+   }
+  },
+  {
+   "id": "call:code:fn:services/orders/app/main.py#create_order->code:fn:services/orders/app/payments.py#charge",
+   "from": {
+    "node": "code:fn:services/orders/app/main.py#create_order"
+   },
+   "to": {
+    "node": "code:fn:services/orders/app/payments.py#charge"
+   },
+   "kind": "call",
+   "count": 1,
+   "metadata": {
+    "file": "services/orders/app/main.py"
+   }
+  },
+  {
+   "id": "call:code:fn:services/orders/app/main.py#create_order->code:fn:services/orders/app/models.py#Order",
+   "from": {
+    "node": "code:fn:services/orders/app/main.py#create_order"
+   },
+   "to": {
+    "node": "code:fn:services/orders/app/models.py#Order"
+   },
+   "kind": "call",
+   "count": 1,
+   "metadata": {
+    "file": "services/orders/app/main.py"
+   }
+  },
+  {
+   "id": "call:code:fn:services/orders/app/main.py#create_order->code:fn:services/orders/app/repository.py#next_id",
+   "from": {
+    "node": "code:fn:services/orders/app/main.py#create_order"
+   },
+   "to": {
+    "node": "code:fn:services/orders/app/repository.py#next_id"
+   },
+   "kind": "call",
+   "count": 1,
+   "metadata": {
+    "file": "services/orders/app/main.py"
+   }
+  },
+  {
+   "id": "call:code:fn:services/orders/app/main.py#create_order->code:fn:services/orders/app/repository.py#save_order",
+   "from": {
+    "node": "code:fn:services/orders/app/main.py#create_order"
+   },
+   "to": {
+    "node": "code:fn:services/orders/app/repository.py#save_order"
+   },
+   "kind": "call",
+   "count": 1,
+   "metadata": {
+    "file": "services/orders/app/main.py"
+   }
+  },
+  {
+   "id": "call:code:fn:services/orders/app/main.py#create_order->code:fn:services/orders/app/events.py#order_created",
+   "from": {
+    "node": "code:fn:services/orders/app/main.py#create_order"
+   },
+   "to": {
+    "node": "code:fn:services/orders/app/events.py#order_created"
+   },
+   "kind": "call",
+   "count": 1,
+   "metadata": {
+    "file": "services/orders/app/main.py"
+   }
+  },
+  {
+   "id": "call:code:fn:services/orders/app/main.py#get_order->code:fn:services/orders/app/repository.py#load_order",
+   "from": {
+    "node": "code:fn:services/orders/app/main.py#get_order"
+   },
+   "to": {
+    "node": "code:fn:services/orders/app/repository.py#load_order"
+   },
+   "kind": "call",
+   "count": 1,
+   "metadata": {
+    "file": "services/orders/app/main.py"
+   }
+  },
+  {
+   "id": "call:code:fn:services/orders/app/payments.py#charge->route:services/payments/app/main.py#POST /charges",
+   "from": {
+    "node": "code:fn:services/orders/app/payments.py#charge"
+   },
+   "to": {
+    "node": "route:services/payments/app/main.py#POST /charges"
+   },
+   "kind": "call",
+   "count": 1,
+   "protocol": "http",
+   "label": "POST /charges",
+   "metadata": {
+    "file": "services/orders/app/payments.py"
+   }
+  },
+  {
+   "id": "call:code:fn:services/orders/app/pricing.py#get_price->code:fn:services/orders/app/repository.py#price_for",
+   "from": {
+    "node": "code:fn:services/orders/app/pricing.py#get_price"
+   },
+   "to": {
+    "node": "code:fn:services/orders/app/repository.py#price_for"
+   },
+   "kind": "call",
+   "count": 1,
+   "metadata": {
+    "file": "services/orders/app/pricing.py"
+   }
+  },
+  {
+   "id": "write:code:fn:services/orders/app/pricing.py#invalidate_prices->code:global:services/orders/app/pricing.py#PRICE_CACHE",
+   "from": {
+    "node": "code:fn:services/orders/app/pricing.py#invalidate_prices"
+   },
+   "to": {
+    "node": "code:global:services/orders/app/pricing.py#PRICE_CACHE"
+   },
+   "kind": "write",
+   "count": 2,
+   "metadata": {
+    "file": "services/orders/app/pricing.py"
+   }
+  },
+  {
+   "id": "call:code:fn:services/orders/app/pricing.py#apply_discounts->code:fn:services/orders/app/pricing.py#apply_discounts",
+   "from": {
+    "node": "code:fn:services/orders/app/pricing.py#apply_discounts"
+   },
+   "to": {
+    "node": "code:fn:services/orders/app/pricing.py#apply_discounts"
+   },
+   "kind": "call",
+   "count": 1,
+   "metadata": {
+    "file": "services/orders/app/pricing.py"
+   }
+  },
+  {
+   "id": "call:code:fn:services/orders/app/pricing.py#price_order->code:fn:services/orders/app/pricing.py#validate_items",
+   "from": {
+    "node": "code:fn:services/orders/app/pricing.py#price_order"
+   },
+   "to": {
+    "node": "code:fn:services/orders/app/pricing.py#validate_items"
+   },
+   "kind": "call",
+   "count": 1,
+   "metadata": {
+    "file": "services/orders/app/pricing.py"
+   }
+  },
+  {
+   "id": "call:code:fn:services/orders/app/pricing.py#price_order->code:fn:services/orders/app/pricing.py#get_price",
+   "from": {
+    "node": "code:fn:services/orders/app/pricing.py#price_order"
+   },
+   "to": {
+    "node": "code:fn:services/orders/app/pricing.py#get_price"
+   },
+   "kind": "call",
+   "count": 1,
+   "metadata": {
+    "file": "services/orders/app/pricing.py"
+   }
+  },
+  {
+   "id": "call:code:fn:services/orders/app/pricing.py#price_order->code:fn:services/orders/app/pricing.py#apply_discounts",
+   "from": {
+    "node": "code:fn:services/orders/app/pricing.py#price_order"
+   },
+   "to": {
+    "node": "code:fn:services/orders/app/pricing.py#apply_discounts"
+   },
+   "kind": "call",
+   "count": 1,
+   "metadata": {
+    "file": "services/orders/app/pricing.py"
+   }
+  },
+  {
+   "id": "read:code:global:services/orders/app/pricing.py#PRICE_CACHE->code:fn:services/orders/app/pricing.py#get_price",
+   "from": {
+    "node": "code:global:services/orders/app/pricing.py#PRICE_CACHE"
+   },
+   "to": {
+    "node": "code:fn:services/orders/app/pricing.py#get_price"
+   },
+   "kind": "read",
+   "count": 3,
+   "metadata": {
+    "file": "services/orders/app/pricing.py"
+   }
+  },
+  {
+   "id": "write:code:fn:services/orders/app/pricing.py#get_price->code:global:services/orders/app/pricing.py#PRICE_CACHE",
+   "from": {
+    "node": "code:fn:services/orders/app/pricing.py#get_price"
+   },
+   "to": {
+    "node": "code:global:services/orders/app/pricing.py#PRICE_CACHE"
+   },
+   "kind": "write",
+   "count": 1,
+   "metadata": {
+    "file": "services/orders/app/pricing.py"
+   }
+  },
+  {
+   "id": "read:code:global:services/orders/app/pricing.py#PRICE_CACHE->code:fn:services/orders/app/pricing.py#invalidate_prices",
+   "from": {
+    "node": "code:global:services/orders/app/pricing.py#PRICE_CACHE"
+   },
+   "to": {
+    "node": "code:fn:services/orders/app/pricing.py#invalidate_prices"
+   },
+   "kind": "read",
+   "count": 1,
+   "metadata": {
+    "file": "services/orders/app/pricing.py"
+   }
+  },
+  {
+   "id": "call:code:fn:services/orders/app/repository.py#save_order->code:fn:services/orders/app/repository.py#connection",
+   "from": {
+    "node": "code:fn:services/orders/app/repository.py#save_order"
+   },
+   "to": {
+    "node": "code:fn:services/orders/app/repository.py#connection"
+   },
+   "kind": "call",
+   "count": 2,
+   "metadata": {
+    "file": "services/orders/app/repository.py"
+   }
+  },
+  {
+   "id": "write:code:fn:services/orders/app/repository.py#save_order->store:postgresql",
+   "from": {
+    "node": "code:fn:services/orders/app/repository.py#save_order"
+   },
+   "to": {
+    "node": "store:postgresql"
+   },
+   "kind": "write",
+   "count": 2,
+   "protocol": "postgresql",
+   "label": "INSERT orders",
+   "metadata": {
+    "file": "services/orders/app/repository.py"
+   }
+  },
+  {
+   "id": "call:code:fn:services/orders/app/repository.py#load_order->code:fn:services/orders/app/repository.py#connection",
+   "from": {
+    "node": "code:fn:services/orders/app/repository.py#load_order"
+   },
+   "to": {
+    "node": "code:fn:services/orders/app/repository.py#connection"
+   },
+   "kind": "call",
+   "count": 1,
+   "metadata": {
+    "file": "services/orders/app/repository.py"
+   }
+  },
+  {
+   "id": "read:store:postgresql->code:fn:services/orders/app/repository.py#load_order",
+   "from": {
+    "node": "store:postgresql"
+   },
+   "to": {
+    "node": "code:fn:services/orders/app/repository.py#load_order"
+   },
+   "kind": "read",
+   "count": 2,
+   "protocol": "postgresql",
+   "label": "SELECT orders",
+   "metadata": {
+    "file": "services/orders/app/repository.py"
+   }
+  },
+  {
+   "id": "call:code:fn:services/orders/app/repository.py#load_order->code:fn:services/orders/app/models.py#Order",
+   "from": {
+    "node": "code:fn:services/orders/app/repository.py#load_order"
+   },
+   "to": {
+    "node": "code:fn:services/orders/app/models.py#Order"
+   },
+   "kind": "call",
+   "count": 1,
+   "metadata": {
+    "file": "services/orders/app/repository.py"
+   }
+  },
+  {
+   "id": "call:code:fn:services/orders/app/repository.py#price_for->code:fn:services/orders/app/repository.py#connection",
+   "from": {
+    "node": "code:fn:services/orders/app/repository.py#price_for"
+   },
+   "to": {
+    "node": "code:fn:services/orders/app/repository.py#connection"
+   },
+   "kind": "call",
+   "count": 1,
+   "metadata": {
+    "file": "services/orders/app/repository.py"
+   }
+  },
+  {
+   "id": "read:store:postgresql->code:fn:services/orders/app/repository.py#price_for",
+   "from": {
+    "node": "store:postgresql"
+   },
+   "to": {
+    "node": "code:fn:services/orders/app/repository.py#price_for"
+   },
+   "kind": "read",
+   "count": 2,
+   "protocol": "postgresql",
+   "label": "SELECT products",
+   "metadata": {
+    "file": "services/orders/app/repository.py"
+   }
+  },
+  {
+   "id": "call:code:fn:services/orders/app/repository.py#fetch_customer->code:fn:services/orders/app/repository.py#connection",
+   "from": {
+    "node": "code:fn:services/orders/app/repository.py#fetch_customer"
+   },
+   "to": {
+    "node": "code:fn:services/orders/app/repository.py#connection"
+   },
+   "kind": "call",
+   "count": 1,
+   "metadata": {
+    "file": "services/orders/app/repository.py"
+   }
+  },
+  {
+   "id": "read:store:postgresql->code:fn:services/orders/app/repository.py#fetch_customer",
+   "from": {
+    "node": "store:postgresql"
+   },
+   "to": {
+    "node": "code:fn:services/orders/app/repository.py#fetch_customer"
+   },
+   "kind": "read",
+   "count": 2,
+   "protocol": "postgresql",
+   "label": "SELECT customers",
+   "metadata": {
+    "file": "services/orders/app/repository.py"
+   }
+  },
+  {
+   "id": "read:code:global:services/orders/app/repository.py#_conn->code:fn:services/orders/app/repository.py#connection",
+   "from": {
+    "node": "code:global:services/orders/app/repository.py#_conn"
+   },
+   "to": {
+    "node": "code:fn:services/orders/app/repository.py#connection"
+   },
+   "kind": "read",
+   "count": 2,
+   "metadata": {
+    "file": "services/orders/app/repository.py"
+   }
+  },
+  {
+   "id": "write:code:fn:services/orders/app/repository.py#connection->code:global:services/orders/app/repository.py#_conn",
+   "from": {
+    "node": "code:fn:services/orders/app/repository.py#connection"
+   },
+   "to": {
+    "node": "code:global:services/orders/app/repository.py#_conn"
+   },
+   "kind": "write",
+   "count": 1,
+   "metadata": {
+    "file": "services/orders/app/repository.py"
+   }
+  },
+  {
+   "id": "read:code:global:services/payments/app/fraud.py#BLOCKLIST->code:fn:services/payments/app/fraud.py#risk_score",
+   "from": {
+    "node": "code:global:services/payments/app/fraud.py#BLOCKLIST"
+   },
+   "to": {
+    "node": "code:fn:services/payments/app/fraud.py#risk_score"
+   },
+   "kind": "read",
+   "count": 1,
+   "metadata": {
+    "file": "services/payments/app/fraud.py"
+   }
+  },
+  {
+   "id": "call:code:file:services/payments/app/main.py->code:pkg:flask",
+   "from": {
+    "node": "code:file:services/payments/app/main.py"
+   },
+   "to": {
+    "node": "code:pkg:flask"
+   },
+   "kind": "call",
+   "count": 1,
+   "label": "Flask",
+   "metadata": {
+    "file": "services/payments/app/main.py"
+   }
+  },
+  {
+   "id": "call:code:fn:services/payments/app/main.py#charge->code:pkg:flask",
+   "from": {
+    "node": "code:fn:services/payments/app/main.py#charge"
+   },
+   "to": {
+    "node": "code:pkg:flask"
+   },
+   "kind": "call",
+   "count": 1,
+   "label": "request.get_json",
+   "metadata": {
+    "file": "services/payments/app/main.py"
+   }
+  },
+  {
+   "id": "call:code:fn:services/payments/app/main.py#charge->code:fn:services/payments/app/fraud.py#risk_score",
+   "from": {
+    "node": "code:fn:services/payments/app/main.py#charge"
+   },
+   "to": {
+    "node": "code:fn:services/payments/app/fraud.py#risk_score"
+   },
+   "kind": "call",
+   "count": 1,
+   "metadata": {
+    "file": "services/payments/app/main.py"
+   }
+  },
+  {
+   "id": "call:code:fn:services/payments/app/main.py#charge->code:fn:services/payments/app/stripe_client.py#create_charge",
+   "from": {
+    "node": "code:fn:services/payments/app/main.py#charge"
+   },
+   "to": {
+    "node": "code:fn:services/payments/app/stripe_client.py#create_charge"
+   },
+   "kind": "call",
+   "count": 1,
+   "metadata": {
+    "file": "services/payments/app/main.py"
+   }
+  },
+  {
+   "id": "call:code:fn:services/payments/app/stripe_client.py#create_charge->ext:http:api.stripe.com",
+   "from": {
+    "node": "code:fn:services/payments/app/stripe_client.py#create_charge"
+   },
+   "to": {
+    "node": "ext:http:api.stripe.com"
+   },
+   "kind": "call",
+   "count": 1,
+   "protocol": "http",
+   "label": "POST /v1/charges",
+   "metadata": {
+    "file": "services/payments/app/stripe_client.py"
+   }
+  },
+  {
+   "id": "depends_on:tf:aws_security_group.lb->tf:module.network",
+   "from": {
+    "node": "tf:aws_security_group.lb"
+   },
+   "to": {
+    "node": "tf:module.network"
+   },
+   "kind": "depends_on"
+  },
+  {
+   "id": "depends_on:tf:aws_security_group.nodes->tf:module.network",
+   "from": {
+    "node": "tf:aws_security_group.nodes"
+   },
+   "to": {
+    "node": "tf:module.network"
+   },
+   "kind": "depends_on"
+  },
+  {
+   "id": "depends_on:tf:aws_security_group.db->tf:module.network",
+   "from": {
+    "node": "tf:aws_security_group.db"
+   },
+   "to": {
+    "node": "tf:module.network"
+   },
+   "kind": "depends_on"
+  },
+  {
+   "id": "depends_on:tf:aws_security_group.kafka->tf:module.network",
+   "from": {
+    "node": "tf:aws_security_group.kafka"
+   },
+   "to": {
+    "node": "tf:module.network"
+   },
+   "kind": "depends_on"
+  },
+  {
+   "id": "depends_on:tf:aws_lb.public->tf:module.network",
+   "from": {
+    "node": "tf:aws_lb.public"
+   },
+   "to": {
+    "node": "tf:module.network"
+   },
+   "kind": "depends_on"
+  },
+  {
+   "id": "depends_on:tf:aws_lb.public->tf:aws_security_group.lb",
+   "from": {
+    "node": "tf:aws_lb.public"
+   },
+   "to": {
+    "node": "tf:aws_security_group.lb"
+   },
+   "kind": "depends_on"
+  },
+  {
+   "id": "depends_on:tf:aws_lb_target_group.ingress->tf:module.network",
+   "from": {
+    "node": "tf:aws_lb_target_group.ingress"
+   },
+   "to": {
+    "node": "tf:module.network"
+   },
+   "kind": "depends_on"
+  },
+  {
+   "id": "network:tf:aws_lb.public->tf:aws_lb_listener.https",
+   "from": {
+    "node": "tf:aws_lb.public"
+   },
+   "to": {
+    "node": "tf:aws_lb_listener.https"
+   },
+   "kind": "network",
+   "protocol": "https",
+   "label": "https/443"
+  },
+  {
+   "id": "network:tf:aws_lb_listener.https->tf:aws_lb_target_group.ingress",
+   "from": {
+    "node": "tf:aws_lb_listener.https"
+   },
+   "to": {
+    "node": "tf:aws_lb_target_group.ingress"
+   },
+   "kind": "network",
+   "protocol": "https"
+  },
+  {
+   "id": "depends_on:tf:aws_eks_cluster.shop->tf:module.network",
+   "from": {
+    "node": "tf:aws_eks_cluster.shop"
+   },
+   "to": {
+    "node": "tf:module.network"
+   },
+   "kind": "depends_on"
+  },
+  {
+   "id": "depends_on:tf:aws_eks_cluster.shop->tf:aws_security_group.nodes",
+   "from": {
+    "node": "tf:aws_eks_cluster.shop"
+   },
+   "to": {
+    "node": "tf:aws_security_group.nodes"
+   },
+   "kind": "depends_on"
+  },
+  {
+   "id": "depends_on:tf:aws_eks_node_group.default->tf:aws_eks_cluster.shop",
+   "from": {
+    "node": "tf:aws_eks_node_group.default"
+   },
+   "to": {
+    "node": "tf:aws_eks_cluster.shop"
+   },
+   "kind": "depends_on"
+  },
+  {
+   "id": "network:tf:aws_lb_target_group.ingress->tf:aws_autoscaling_attachment.ingress",
+   "from": {
+    "node": "tf:aws_lb_target_group.ingress"
+   },
+   "to": {
+    "node": "tf:aws_autoscaling_attachment.ingress"
+   },
+   "kind": "network",
+   "protocol": "http",
+   "label": "http/30080"
+  },
+  {
+   "id": "depends_on:tf:aws_autoscaling_attachment.ingress->tf:aws_eks_node_group.default",
+   "from": {
+    "node": "tf:aws_autoscaling_attachment.ingress"
+   },
+   "to": {
+    "node": "tf:aws_eks_node_group.default"
+   },
+   "kind": "depends_on"
+  },
+  {
+   "id": "depends_on:store:postgresql->tf:aws_security_group.db",
+   "from": {
+    "node": "store:postgresql"
+   },
+   "to": {
+    "node": "tf:aws_security_group.db"
+   },
+   "kind": "depends_on"
+  },
+  {
+   "id": "depends_on:store:postgresql->tf:aws_db_subnet_group.main",
+   "from": {
+    "node": "store:postgresql"
+   },
+   "to": {
+    "node": "tf:aws_db_subnet_group.main"
+   },
+   "kind": "depends_on"
+  },
+  {
+   "id": "depends_on:tf:aws_db_subnet_group.main->tf:module.network",
+   "from": {
+    "node": "tf:aws_db_subnet_group.main"
+   },
+   "to": {
+    "node": "tf:module.network"
+   },
+   "kind": "depends_on"
+  },
+  {
+   "id": "depends_on:queue:kafka->tf:module.network",
+   "from": {
+    "node": "queue:kafka"
+   },
+   "to": {
+    "node": "tf:module.network"
+   },
+   "kind": "depends_on"
+  },
+  {
+   "id": "depends_on:queue:kafka->tf:aws_security_group.kafka",
+   "from": {
+    "node": "queue:kafka"
+   },
+   "to": {
+    "node": "tf:aws_security_group.kafka"
+   },
+   "kind": "depends_on"
+  },
+  {
+   "id": "depends_on:tf:module.network.aws_subnet.private_a->tf:module.network.aws_vpc.main",
+   "from": {
+    "node": "tf:module.network.aws_subnet.private_a"
+   },
+   "to": {
+    "node": "tf:module.network.aws_vpc.main"
+   },
+   "kind": "depends_on"
+  },
+  {
+   "id": "depends_on:tf:module.network.aws_subnet.private_b->tf:module.network.aws_vpc.main",
+   "from": {
+    "node": "tf:module.network.aws_subnet.private_b"
+   },
+   "to": {
+    "node": "tf:module.network.aws_vpc.main"
+   },
+   "kind": "depends_on"
+  },
+  {
+   "id": "depends_on:tf:module.network.aws_subnet.public_a->tf:module.network.aws_vpc.main",
+   "from": {
+    "node": "tf:module.network.aws_subnet.public_a"
+   },
+   "to": {
+    "node": "tf:module.network.aws_vpc.main"
+   },
+   "kind": "depends_on"
+  },
+  {
+   "id": "depends_on:tf:module.network.aws_internet_gateway.igw->tf:module.network.aws_vpc.main",
+   "from": {
+    "node": "tf:module.network.aws_internet_gateway.igw"
+   },
+   "to": {
+    "node": "tf:module.network.aws_vpc.main"
+   },
+   "kind": "depends_on"
+  },
+  {
+   "id": "network:net:internet->tf:aws_lb.public",
+   "from": {
+    "node": "net:internet"
+   },
+   "to": {
+    "node": "tf:aws_lb.public"
+   },
+   "kind": "network",
+   "protocol": "tcp",
+   "label": "tcp/443"
+  },
+  {
+   "id": "network:tf:aws_lb.public->tf:aws_eks_cluster.shop",
+   "from": {
+    "node": "tf:aws_lb.public"
+   },
+   "to": {
+    "node": "tf:aws_eks_cluster.shop"
+   },
+   "kind": "network",
+   "protocol": "tcp",
+   "label": "tcp/30080"
+  },
+  {
+   "id": "network:tf:aws_eks_cluster.shop->store:postgresql",
+   "from": {
+    "node": "tf:aws_eks_cluster.shop"
+   },
+   "to": {
+    "node": "store:postgresql"
+   },
+   "kind": "network",
+   "protocol": "tcp",
+   "label": "tcp/5432"
+  },
+  {
+   "id": "network:tf:aws_eks_cluster.shop->queue:kafka",
+   "from": {
+    "node": "tf:aws_eks_cluster.shop"
+   },
+   "to": {
+    "node": "queue:kafka"
+   },
+   "kind": "network",
+   "protocol": "tcp",
+   "label": "tcp/9092-9098"
+  },
+  {
+   "id": "network:k8s:shop/Service/gateway->code:dir:services/gateway/src",
+   "from": {
+    "node": "k8s:shop/Service/gateway"
+   },
+   "to": {
+    "node": "code:dir:services/gateway/src"
+   },
+   "kind": "network",
+   "protocol": "tcp",
+   "label": "80\u21928080"
+  },
+  {
+   "id": "network:k8s:shop/Service/orders->code:dir:services/orders/app",
+   "from": {
+    "node": "k8s:shop/Service/orders"
+   },
+   "to": {
+    "node": "code:dir:services/orders/app"
+   },
+   "kind": "network",
+   "protocol": "tcp",
+   "label": "8000\u21928000"
+  },
+  {
+   "id": "network:k8s:shop/Service/payments->code:dir:services/payments/app",
+   "from": {
+    "node": "k8s:shop/Service/payments"
+   },
+   "to": {
+    "node": "code:dir:services/payments/app"
+   },
+   "kind": "network",
+   "protocol": "tcp",
+   "label": "9000\u21929000"
+  },
+  {
+   "id": "network:k8s:shop/Ingress/shop->k8s:shop/Service/gateway",
+   "from": {
+    "node": "k8s:shop/Ingress/shop"
+   },
+   "to": {
+    "node": "k8s:shop/Service/gateway"
+   },
+   "kind": "network",
+   "protocol": "http",
+   "label": "shop.example.com/"
+  },
+  {
+   "id": "network:code:dir:services/gateway/src->k8s:shop/Service/orders",
+   "from": {
+    "node": "code:dir:services/gateway/src"
+   },
+   "to": {
+    "node": "k8s:shop/Service/orders"
+   },
+   "kind": "network",
+   "protocol": "http",
+   "label": "ORDERS_URL"
+  },
+  {
+   "id": "network:code:dir:services/orders/app->k8s:shop/Service/payments",
+   "from": {
+    "node": "code:dir:services/orders/app"
+   },
+   "to": {
+    "node": "k8s:shop/Service/payments"
+   },
+   "kind": "network",
+   "protocol": "http",
+   "label": "PAYMENTS_URL"
+  },
+  {
+   "id": "depends_on:code:dir:services/orders/app->k8s:shop/ConfigMap/shop-config",
+   "from": {
+    "node": "code:dir:services/orders/app"
+   },
+   "to": {
+    "node": "k8s:shop/ConfigMap/shop-config"
+   },
+   "kind": "depends_on"
+  },
+  {
+   "id": "depends_on:code:dir:services/payments/app->k8s:shop/Secret/stripe",
+   "from": {
+    "node": "code:dir:services/payments/app"
+   },
+   "to": {
+    "node": "k8s:shop/Secret/stripe"
+   },
+   "kind": "depends_on"
+  },
+  {
+   "id": "depends_on:code:dir:services/notifier/src->k8s:shop/ConfigMap/shop-config",
+   "from": {
+    "node": "code:dir:services/notifier/src"
+   },
+   "to": {
+    "node": "k8s:shop/ConfigMap/shop-config"
+   },
+   "kind": "depends_on"
+  },
+  {
+   "id": "network:code:dir:services/orders/app->code:dir:services/payments/app",
+   "from": {
+    "node": "code:dir:services/orders/app"
+   },
+   "to": {
+    "node": "code:dir:services/payments/app"
+   },
+   "kind": "network",
+   "protocol": "tcp",
+   "label": "tcp/9000",
+   "metadata": {}
+  }
+ ]
+}

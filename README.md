@@ -115,6 +115,8 @@ The interactive API reference (Swagger UI) is available at **http://localhost:80
 
 **Dependency graph:** RootOps builds a cross-repository knowledge graph of service dependencies, causal relationships, and entity co-occurrences. Causal edges are promoted through confidence levels (observed > correlates_with > probable_cause > confirmed_cause) based on incident evidence and statistical analysis.
 
+**Structure from [Breadth](https://github.com/theorjiugovictor/breadth):** during ingestion RootOps runs `breadth scan`, which parses code with tree-sitter and reads Terraform and Kubernetes manifests. The result is rolled up to services, databases, queues, topics and external APIs and stored as `structural` graph edges (`calls`, `reads_from`, `writes_to`, `publishes_to`, `subscribes_to`, `connects_to`). Structural edges are never promoted and never appear in causal chains; they give the causation check a real topology, so "is there a path from A to B?" is answered from how the system is actually wired. Breadth's aliases (Kubernetes names, OpenTelemetry `service.name`) are merged into the entity registry. A graph scanned elsewhere, for example by Breadth's GitHub Action, can be pushed with `POST /api/graph/breadth?repo=<name>`. Set `DEP_GRAPH_SOURCE=regex` to keep the old regex extractor.
+
 ### Log Intelligence
 
 **OTLP/HTTP receiver:** Accepts logs directly from OpenTelemetry SDKs and Collectors at the standard `POST /v1/logs` endpoint. No sidecar or agent required.
