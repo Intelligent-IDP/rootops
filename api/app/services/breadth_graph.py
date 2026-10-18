@@ -206,7 +206,7 @@ def _dependency_type(edge: StructuralEdge) -> str | None:
 def breadth_command() -> list[str] | None:
     """Return the command that runs Breadth, or None if it is not installed."""
     configured = get_settings().BREADTH_BIN.strip()
-    if configured.endswith(".mjs") or configured.endswith(".js"):
+    if configured.endswith((".mjs", ".js")):
         node = shutil.which("node")
         return [node, configured] if node and os.path.exists(configured) else None
     found = shutil.which(configured or "breadth")
@@ -238,8 +238,12 @@ async def scan_repository(repo_path: str) -> dict | None:
         if proc.returncode != 0 or not os.path.exists(out):
             logger.warning("breadth scan failed (%s): %s", proc.returncode, stderr.decode()[-500:])
             return None
-        with open(out, encoding="utf-8") as f:
-            return json.load(f)
+        return await asyncio.to_thread(_read_json, out)
+
+
+def _read_json(path: str) -> dict:
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
 
 
 # ── Persisting ────────────────────────────────────────────────────
@@ -352,7 +356,7 @@ async def import_flowgraph(
             if not dep_type:
                 continue
             target = edge.target.name.lower()
-            source_file = sorted(edge.files)[0] if edge.files else f"breadth:{edge.source.name}"
+            source_file = min(edge.files) if edge.files else f"breadth:{edge.source.name}"
             key = (target, dep_type)
             if target == repo_name.lower() or key in seen:
                 continue
