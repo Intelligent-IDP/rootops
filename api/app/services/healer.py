@@ -29,7 +29,7 @@ import logging
 import re
 import uuid
 
-from sqlalchemy import delete, select, text, func
+from sqlalchemy import delete, func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import get_settings

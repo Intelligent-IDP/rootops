@@ -12,12 +12,12 @@ so the LLM cannot falsely assert causation from a single correlation.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+import uuid as _uuid
+from datetime import UTC, datetime
 
 from sqlalchemy import DateTime, Float, Integer, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import Mapped, mapped_column
-import uuid as _uuid
 
 from app.models.base import Base
 
@@ -75,12 +75,12 @@ class GraphEdge(Base):
     # ── Timestamps ───────────────────────────────────────────────
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
         nullable=False,
     )
     last_seen_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
         nullable=False,
     )
     promoted_at: Mapped[datetime | None] = mapped_column(

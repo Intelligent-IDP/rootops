@@ -23,7 +23,6 @@ import logging
 import re
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
 
 from app.config import get_settings
 
@@ -66,11 +65,11 @@ class RetrievalPlan:
     concept_fetch_k: int = 10
 
     # Optional time scoping (ISO strings)
-    time_from: Optional[str] = None
-    time_to: Optional[str] = None
+    time_from: str | None = None
+    time_to: str | None = None
 
     # Minimum similarity threshold override (None = use global config)
-    similarity_threshold_override: Optional[float] = None
+    similarity_threshold_override: float | None = None
 
 
 # ── Signal patterns for classification ───────────────────────────

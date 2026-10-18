@@ -14,7 +14,6 @@ from functools import lru_cache
 from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-
 # ── RAM auto-detection ───────────────────────────────────────────
 
 def _detect_available_ram_gb() -> float:

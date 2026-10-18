@@ -10,9 +10,9 @@ from __future__ import annotations
 import logging
 import uuid
 from collections import Counter
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.code_chunk import CodeChunk
@@ -153,7 +153,7 @@ async def build_developer_profiles(session: AsyncSession) -> list[dict]:
             profile.files_touched = dict(files_touched)
             profile.primary_languages = dict(language_counter)
             profile.embedding = style_embedding
-            profile.last_updated = datetime.now(timezone.utc)
+            profile.last_updated = datetime.now(UTC)
         else:
             profile = DevProfile(
                 id=uuid.uuid4(),

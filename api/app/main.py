@@ -32,13 +32,13 @@ __version__ = "1.0.0"
 
 
 @asynccontextmanager
-async def lifespan(application: FastAPI):  # noqa: ARG001
+async def lifespan(application: FastAPI):
     """Run startup tasks before the app begins serving requests."""
     # Ensure tables exist (Alembic is preferred for production)
     await init_db()
 
     # ── Log auto-detected memory tier ──────────────────────────────
-    from app.config import DETECTED_RAM_GB, _RAM_TIER_LABEL
+    from app.config import _RAM_TIER_LABEL, DETECTED_RAM_GB
     backend = settings.LLM_BACKEND.lower()
     if settings.LLM_AVAILABLE:
         llm_status = f"{backend} ✅"
@@ -64,6 +64,7 @@ async def lifespan(application: FastAPI):  # noqa: ARG001
     # failed so the UI doesn't show a permanent "Ingesting…" spinner.
     try:
         from sqlalchemy import update
+
         from app.models.ingestion_state import IngestionState
 
         async with async_session() as session:
@@ -113,6 +114,7 @@ async def lifespan(application: FastAPI):  # noqa: ARG001
     # ── Optional: Auto-ingest a repo on startup ─────────────────
     if settings.AUTO_INGEST_REPO_PATH:
         from pathlib import Path
+
         from app.api.ingest import _set_state
 
         repo = Path(settings.AUTO_INGEST_REPO_PATH)
@@ -207,10 +209,11 @@ app.include_router(pr_review_router)
 # OpenTelemetry SDKs and Collectors export logs to POST /v1/logs.
 # This endpoint is at the root level to comply with the OTLP spec.
 
-from fastapi import Depends, HTTPException, Request  # noqa: E402
-from fastapi.responses import JSONResponse as _JSONResponse  # noqa: E402
-from app.db import get_db as _get_db  # noqa: E402
-from app.services.otel_collector import ingest_otel_logs  # noqa: E402
+from fastapi import Depends, HTTPException, Request
+from fastapi.responses import JSONResponse as _JSONResponse
+
+from app.db import get_db as _get_db
+from app.services.otel_collector import ingest_otel_logs
 
 
 @app.post("/v1/logs", tags=["otel"])

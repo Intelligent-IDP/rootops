@@ -19,7 +19,7 @@ Dependency types extracted:
 """
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import DateTime, Float, Index, String, Text
 from sqlalchemy.dialects.postgresql import UUID
@@ -78,7 +78,7 @@ class ServiceDependency(Base):
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
         nullable=False,
     )
 

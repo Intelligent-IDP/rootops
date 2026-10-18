@@ -34,7 +34,7 @@ import shutil
 import tempfile
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -230,7 +230,7 @@ async def scan_repository(repo_path: str) -> dict | None:
             _, stderr = await asyncio.wait_for(
                 proc.communicate(), timeout=timeout
             )
-        except asyncio.TimeoutError:
+        except TimeoutError:
             proc.kill()
             await proc.wait()
             logger.warning("breadth scan timed out after %ss", timeout)
@@ -264,7 +264,7 @@ async def import_flowgraph(
         raise ValueError("not a Breadth flowgraph (expected version 1.0 with nodes and edges)")
 
     graph = roll_up(flowgraph)
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     repo_key = str(repo_id) if repo_id else repo_name
 
     # 1. Entities: merge aliases, never drop existing ones.

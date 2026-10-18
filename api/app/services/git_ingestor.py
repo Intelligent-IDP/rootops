@@ -17,17 +17,17 @@ import logging
 import shutil
 import tempfile
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from git import Repo as GitRepo
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import get_settings
 from app.models.code_chunk import CodeChunk
 from app.models.commit import Commit
 from app.models.repository import Repository
-from app.config import get_settings
 from app.services.chunker import ChunkResult, chunk_file, is_supported_file
 from app.services.embedding import embed_batch
 
@@ -213,7 +213,7 @@ async def ingest_repository(
             author_name=git_commit.author.name or "Unknown",
             author_email=git_commit.author.email or "",
             committed_at=datetime.fromtimestamp(
-                git_commit.committed_date, tz=timezone.utc
+                git_commit.committed_date, tz=UTC
             ),
             branch=branch if branch != "HEAD" else _get_active_branch(git_repo),
             files_changed=_get_changed_files(git_commit),
@@ -327,7 +327,7 @@ async def ingest_repository(
     repo_record.commit_count = (
         repo_record.commit_count + stats["commits_ingested"]
     )
-    repo_record.last_ingested_at = datetime.now(timezone.utc)
+    repo_record.last_ingested_at = datetime.now(UTC)
     await session.flush()
 
     await session.commit()
@@ -384,6 +384,7 @@ async def _generate_codebase_summary(
 ) -> None:
     """Generate and persist an LLM architectural summary for a repository."""
     from sqlalchemy import text as sa_text
+
     from app.models.codebase_summary import CodebaseSummary
     from app.services.llm_backend import generate
 
@@ -428,7 +429,7 @@ async def _generate_codebase_summary(
         existing.summary = summary_text
         existing.repo_path = repo_path
         existing.chunk_count = len(rows)
-        existing.generated_at = datetime.now(timezone.utc)
+        existing.generated_at = datetime.now(UTC)
     else:
         session.add(CodebaseSummary(
             repo_id=repo_id,

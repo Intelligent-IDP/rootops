@@ -15,7 +15,7 @@ import logging
 import re
 import uuid
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from threading import Lock
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -100,7 +100,7 @@ def _check_rate_limit(service: str) -> bool:
     if limit <= 0:
         return False
 
-    hour_key = datetime.now(tz=timezone.utc).strftime("%Y-%m-%d-%H")
+    hour_key = datetime.now(tz=UTC).strftime("%Y-%m-%d-%H")
 
     with _rate_lock:
         svc_counters = _rate_counters.setdefault(service, {})
@@ -130,7 +130,7 @@ def filter_log_entries(parsed: list[dict]) -> tuple[list[dict], dict]:
     min_rank = _SEVERITY_RANK.get(min_severity, 3)  # default WARN
     allowed_services = _parse_allowed_services()
     max_msg_len = settings.LOG_MAX_MESSAGE_LENGTH
-    now = datetime.now(tz=timezone.utc).timestamp()
+    now = datetime.now(tz=UTC).timestamp()
 
     kept: list[dict] = []
     drop_stats: dict[str, int] = defaultdict(int)
@@ -228,7 +228,7 @@ def _parse_timestamp(text: str) -> datetime | None:
             ]:
                 try:
                     return datetime.strptime(ts_str, fmt).replace(
-                        tzinfo=timezone.utc
+                        tzinfo=UTC
                     )
                 except ValueError:
                     continue

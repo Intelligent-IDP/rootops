@@ -14,12 +14,12 @@ history (edges, incidents) is preserved.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+import uuid as _uuid
+from datetime import UTC, datetime
 
 from sqlalchemy import Boolean, DateTime, String, Text
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import Mapped, mapped_column
-import uuid as _uuid
 
 from app.models.base import Base
 
@@ -68,12 +68,12 @@ class EntityRegistry(Base):
     # ── Timestamps ───────────────────────────────────────────────
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
         nullable=False,
     )
     last_seen_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
         nullable=False,
     )
 
