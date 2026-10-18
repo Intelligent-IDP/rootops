@@ -27,14 +27,10 @@ from __future__ import annotations
 import logging
 import re
 import uuid
-from typing import TYPE_CHECKING
 
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
-
-if TYPE_CHECKING:
-    pass
 
 logger = logging.getLogger(__name__)
 
@@ -220,8 +216,8 @@ async def extract_and_persist_dependencies(
     Returns:
         Number of dependency rows upserted.
     """
-    from app.models.service_dependency import ServiceDependency
     from app.models.repository import Repository
+    from app.models.service_dependency import ServiceDependency
 
     # Load all known service names for import filtering
     result = await session.execute(select(Repository.name, Repository.id))

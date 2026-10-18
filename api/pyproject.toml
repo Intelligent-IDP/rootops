@@ -46,3 +46,16 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["app"]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI's dependency/parameter markers are meant to be called in defaults.
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Body"]
+
+[tool.ruff.lint.flake8-comprehensions]
+# dict(key=value) reads better in the aligned RAM-tier table and LLM kwargs.
+allow-dict-calls-with-keyword-arguments = true
+
+[tool.ruff.lint]
+# Blind `except Exception` is deliberate for best-effort steps (ingestion
+# stages, LLM providers, summaries, health checks) that log and degrade.
+ignore = ["BLE001"]

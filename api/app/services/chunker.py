@@ -209,8 +209,7 @@ def _chunk_sliding_window(
     total = len(lines)
     step = cfg.max_chunk_lines - cfg.overlap_lines
 
-    if step < 1:
-        step = 1
+    step = max(step, 1)
 
     i = 0
     while i < total:

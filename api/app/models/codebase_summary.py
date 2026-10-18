@@ -10,7 +10,7 @@ but the primary key is now repo_id.
 """
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
@@ -38,7 +38,7 @@ class CodebaseSummary(Base):
     chunk_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     generated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
         nullable=False,
     )
 

@@ -34,7 +34,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -64,8 +64,8 @@ def _granger_test(series_a: list[float], series_b: list[float], max_lag: int = 3
         return None
 
     try:
-        from statsmodels.tsa.stattools import grangercausalitytests
         import numpy as np
+        from statsmodels.tsa.stattools import grangercausalitytests
 
         data = np.column_stack([series_b, series_a])
         results = grangercausalitytests(data, maxlag=max_lag, verbose=False)
@@ -148,7 +148,7 @@ async def record_co_occurrence(
     )
     edge = result.scalar_one_or_none()
 
-    now = datetime.now(tz=timezone.utc)
+    now = datetime.now(tz=UTC)
 
     if edge is None:
         evidence: dict = {
@@ -200,7 +200,7 @@ async def _evaluate_promotion(session: AsyncSession, edge: GraphEdge) -> None:
     incident_count: int = ev.get("incident_count", edge.incident_count)
 
     # ── observed → correlates_with ─────────────────────────────
-    if current_rank < _LEVEL_RANK["correlates_with"]:
+    if current_rank < _LEVEL_RANK["correlates_with"]:  # noqa: SIM102 — one block per promotion step
         if incident_count >= 1 and samples:
             median_lag = _median(samples)
             if median_lag >= 0:
@@ -209,7 +209,7 @@ async def _evaluate_promotion(session: AsyncSession, edge: GraphEdge) -> None:
                 edge.evidence = ev
                 edge.promotion_level = "correlates_with"
                 edge.confidence = min(0.4, 0.1 + incident_count * 0.05)
-                edge.promoted_at = datetime.now(tz=timezone.utc)
+                edge.promoted_at = datetime.now(tz=UTC)
                 logger.info(
                     "Edge %s→%s promoted to correlates_with (incidents=%d)",
                     edge.source_entity, edge.target_entity, incident_count,
@@ -256,7 +256,7 @@ async def _evaluate_promotion(session: AsyncSession, edge: GraphEdge) -> None:
                     + (0.15 if meets_topological else 0)
                     + min(incident_count * 0.02, 0.1),
             )
-            edge.promoted_at = datetime.now(tz=timezone.utc)
+            edge.promoted_at = datetime.now(tz=UTC)
             logger.info(
                 "Edge %s→%s promoted to probable_cause (p=%.3f, topology=%s, incidents=%d)",
                 edge.source_entity, edge.target_entity,
@@ -292,7 +292,7 @@ async def confirm_causation(
     edge.edge_type = "confirmed_cause"
     edge.confidence = 1.0
     edge.confirmed_by = confirmed_by
-    edge.promoted_at = datetime.now(tz=timezone.utc)
+    edge.promoted_at = datetime.now(tz=UTC)
     await session.flush()
     logger.info(
         "Edge %s→%s confirmed as confirmed_cause by %s",

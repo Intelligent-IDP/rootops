@@ -18,12 +18,12 @@ The result is a set of LogConcept rows, each with:
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import logging
 import re
 from collections import defaultdict
-from datetime import datetime, timezone
-from typing import TYPE_CHECKING
+from datetime import UTC, datetime
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -31,9 +31,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import get_settings
 from app.models.log_concept import LogConcept
 from app.services.embedding import embed_batch
-
-if TYPE_CHECKING:
-    pass
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -44,9 +41,9 @@ _VAR_PLACEHOLDER = "<*>"
 
 # Tokens that are always treated as variables (numbers, UUIDs, IPs, hashes)
 _VARIABLE_PATTERNS = [
-    re.compile(r"\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b", re.I),  # UUID
+    re.compile(r"\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b", re.IGNORECASE),  # UUID
     re.compile(r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?::\d+)?\b"),  # IP[:port]
-    re.compile(r"\b[0-9a-f]{32,}\b", re.I),  # hex hash
+    re.compile(r"\b[0-9a-f]{32,}\b", re.IGNORECASE),  # hex hash
     re.compile(r"\b\d+(?:\.\d+)?(?:ms|s|m|h|kb|mb|gb)?\b"),  # numbers with units
     re.compile(r"https?://\S+"),  # URLs
 ]
@@ -96,11 +93,11 @@ def _concept_id(service_name: str, template: str) -> str:
 # ── Temporal helpers ──────────────────────────────────────────────
 
 def _current_hour_key() -> str:
-    return datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H")
+    return datetime.now(tz=UTC).strftime("%Y-%m-%dT%H")
 
 
 def _current_day_key() -> str:
-    return datetime.now(tz=timezone.utc).strftime("%Y-%m-%d")
+    return datetime.now(tz=UTC).strftime("%Y-%m-%d")
 
 
 def _detect_trend(histogram: dict) -> str:
@@ -294,7 +291,7 @@ async def _upsert_concept(
 
         # Recalculate trend
         concept.trend = _detect_trend(hist)
-        concept.last_seen_at = datetime.now(tz=timezone.utc)
+        concept.last_seen_at = datetime.now(tz=UTC)
 
         # Update severity if new one is more severe
         severity_rank = {"DEBUG": 0, "INFO": 1, "WARN": 2, "ERROR": 3, "FATAL": 4, "CRITICAL": 4}
@@ -360,10 +357,8 @@ async def process_log_batch(
             # Seed Drain3 with the LLM-extracted template for next time
             miner = _get_drain(service_name)
             if miner:
-                try:
+                with contextlib.suppress(Exception):
                     miner.add_log_message(tmpl)
-                except Exception:
-                    pass
 
             concept = await _upsert_concept(
                 session, service_name, tmpl, None,

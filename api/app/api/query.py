@@ -8,7 +8,6 @@ This is the primary interface for developers to interact with RootOps.
 from __future__ import annotations
 
 import logging
-
 import uuid
 
 from fastapi import APIRouter, Depends
@@ -138,6 +137,7 @@ async def query_stream(
     session: AsyncSession = Depends(get_db),
 ):
     from fastapi.responses import StreamingResponse
+
     from app.services.rag_engine import stream_query_codebase
     history = [t.model_dump() for t in request.conversation_history]
     repo_ids = [uuid.UUID(r) for r in request.repo_ids] if request.repo_ids else None

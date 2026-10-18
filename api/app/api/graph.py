@@ -7,7 +7,9 @@ Includes causation confirmation and entity alias management.
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from datetime import UTC
+
+from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from pydantic import BaseModel
 
 from app.db import get_db
@@ -125,6 +127,7 @@ async def list_entities(
 ):
     """List entities from the canonical registry."""
     from sqlalchemy import select
+
     from app.models.entity_registry import EntityRegistry
 
     query = select(EntityRegistry).where(EntityRegistry.deprecated == deprecated)
@@ -146,9 +149,11 @@ class EntityUpsertRequest(BaseModel):
 @router.post("/entities")
 async def upsert_entity(body: EntityUpsertRequest, session=Depends(get_db)):
     """Create or update an entity in the canonical registry."""
+    from datetime import datetime
+
     from sqlalchemy import select
+
     from app.models.entity_registry import EntityRegistry
-    from datetime import datetime, timezone
 
     result = await session.execute(
         select(EntityRegistry).where(
@@ -173,7 +178,7 @@ async def upsert_entity(body: EntityUpsertRequest, session=Depends(get_db)):
         entity.aliases = list(existing | set(body.aliases))
         existing_repos = set(entity.repos or [])
         entity.repos = list(existing_repos | set(body.repos))
-        entity.last_seen_at = datetime.now(tz=timezone.utc)
+        entity.last_seen_at = datetime.now(tz=UTC)
         if body.description:
             entity.description = body.description
         if body.metadata_json:
@@ -186,9 +191,11 @@ async def upsert_entity(body: EntityUpsertRequest, session=Depends(get_db)):
 @router.post("/entities/{canonical_name}/deprecate")
 async def deprecate_entity(canonical_name: str, session=Depends(get_db)):
     """Mark an entity as deprecated. History and edges are preserved."""
+    from datetime import datetime
+
     from sqlalchemy import select
+
     from app.models.entity_registry import EntityRegistry
-    from datetime import datetime, timezone
 
     result = await session.execute(
         select(EntityRegistry).where(EntityRegistry.canonical_name == canonical_name)
@@ -198,7 +205,7 @@ async def deprecate_entity(canonical_name: str, session=Depends(get_db)):
         raise HTTPException(status_code=404, detail=f"Entity '{canonical_name}' not found")
 
     entity.deprecated = True
-    entity.deprecated_at = datetime.now(tz=timezone.utc)
+    entity.deprecated_at = datetime.now(tz=UTC)
     await session.commit()
     return entity.to_dict()
 
@@ -221,11 +228,13 @@ async def ingest_deployment_event(body: DeploymentEvent, session=Depends(get_db)
     Updates the EntityRegistry and seeds a Deployment node in the graph.
     Wire this endpoint into your CI/CD pipeline or Argo CD webhooks.
     """
-    from sqlalchemy import select
-    from app.models.entity_registry import EntityRegistry
-    from datetime import datetime, timezone
+    from datetime import datetime
 
-    now = datetime.now(tz=timezone.utc)
+    from sqlalchemy import select
+
+    from app.models.entity_registry import EntityRegistry
+
+    now = datetime.now(tz=UTC)
 
     # Upsert the service entity
     result = await session.execute(
@@ -271,3 +280,37 @@ async def ingest_deployment_event(body: DeploymentEvent, session=Depends(get_db)
         "environment": body.environment,
         "entity": entity.to_dict(),
     }
+
+
+# ── Breadth flowgraph import ──────────────────────────────────────
+
+@router.post("/breadth")
+async def import_breadth_flowgraph(
+    repo: str = Query(..., description="Repository name the graph was scanned from"),
+    flowgraph: dict = Body(..., description="A Breadth flowgraph.json (version 1.0)"),
+    session=Depends(get_db),
+):
+    """
+    Import a Breadth flowgraph produced outside RootOps, for example by
+    `breadth scan .` on a laptop or by the Breadth GitHub Action.
+
+    Replaces this repository's previous structural edges and dependency rows.
+    """
+    from sqlalchemy import func, select
+
+    from app.models.repository import Repository
+    from app.services.breadth_graph import import_flowgraph
+
+    row = (await session.execute(
+        select(Repository).where(func.lower(Repository.name) == repo.lower())
+    )).scalar_one_or_none()
+    try:
+        stats = await import_flowgraph(
+            session, flowgraph,
+            repo_id=row.id if row else None,
+            repo_name=row.name if row else repo,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    await session.commit()
+    return {"status": "imported", "repo": repo, "repo_registered": row is not None, **stats}

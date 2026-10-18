@@ -14,7 +14,6 @@ from functools import lru_cache
 from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-
 # ── RAM auto-detection ───────────────────────────────────────────
 
 def _detect_available_ram_gb() -> float:
@@ -232,6 +231,15 @@ class Settings(BaseSettings):
     # dep-extraction memory don't compete with embedding.
     DISABLE_CODEBASE_SUMMARY: bool = _T["no_summary"]
     DISABLE_DEP_EXTRACTION: bool = _T["no_deps"]
+
+    # ── Dependency graph source ──────────────────────────────────
+    # "breadth" — scan with Breadth (tree-sitter, Terraform, Kubernetes)
+    # "regex"   — legacy regex extractor (service-to-service only)
+    # "auto"    — Breadth when it is installed, otherwise regex
+    DEP_GRAPH_SOURCE: str = "auto"
+    # Path to the Breadth CLI: a command on PATH or a breadth.mjs file.
+    BREADTH_BIN: str = "breadth"
+    BREADTH_SCAN_TIMEOUT_SECONDS: int = 300
 
     # ── Ollama override ──────────────────────────────────────────
     # On ≤8 GB the default backend is *not* Ollama (it's too slow on CPU).

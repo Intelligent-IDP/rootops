@@ -84,8 +84,9 @@ async def _load_codebase_summary(
     Otherwise returns the first valid summary available (or all combined
     if there are multiple).
     """
-    from app.models.codebase_summary import CodebaseSummary
     from sqlalchemy import select
+
+    from app.models.codebase_summary import CodebaseSummary
 
     if repo_ids:
         rows = (

@@ -9,7 +9,7 @@ Uses PyGithub for authenticated operations.
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from github import Github, GithubException
 
@@ -59,7 +59,7 @@ async def create_fix_pr(
         raise RuntimeError(f"Could not access repo '{repo_full_name}': {e}")
 
     # ── 1. Create a fix branch ───────────────────────────────────
-    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    timestamp = datetime.now(UTC).strftime("%Y%m%d-%H%M%S")
     branch_name = f"rootops/auto-heal-{timestamp}"
 
     try:

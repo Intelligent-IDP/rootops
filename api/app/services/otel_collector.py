@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from threading import Lock
 from typing import Any
 
@@ -84,7 +84,7 @@ def _nano_to_datetime(time_unix_nano: int | str | None) -> datetime | None:
         return None
     try:
         ns = int(time_unix_nano)
-        return datetime.fromtimestamp(ns / 1e9, tz=timezone.utc)
+        return datetime.fromtimestamp(ns / 1e9, tz=UTC)
     except (ValueError, OSError):
         return None
 
@@ -231,7 +231,7 @@ def parse_otlp_logs_json(payload: dict) -> list[dict]:
 
                 # Build a JSON line that log_ingestor can parse
                 entry: dict[str, Any] = {
-                    "timestamp": (timestamp or observed or datetime.now(tz=timezone.utc)).isoformat(),
+                    "timestamp": (timestamp or observed or datetime.now(tz=UTC)).isoformat(),
                     "level": severity,
                     "message": body_text,
                     "service": service_name,
@@ -337,7 +337,7 @@ async def ingest_otel_logs(
         _otel_stats["total_log_records_received"] += len(parsed_entries)
         _otel_stats["total_entries_ingested"] += total_ingested
         _otel_stats["total_dropped"] = _otel_stats.get("total_dropped", 0) + total_dropped
-        _otel_stats["last_received_at"] = datetime.now(tz=timezone.utc).isoformat()
+        _otel_stats["last_received_at"] = datetime.now(tz=UTC).isoformat()
         for svc in services_seen:
             _otel_stats["services_seen"][svc] = (
                 _otel_stats["services_seen"].get(svc, 0) + 1

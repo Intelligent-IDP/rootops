@@ -7,12 +7,12 @@ FastAPI dependency-injection and startup initialization.
 
 from collections.abc import AsyncGenerator
 
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
     create_async_engine,
 )
-from sqlalchemy import text
 
 from app.config import get_settings
 
@@ -48,7 +48,7 @@ async def init_db() -> None:
     Handles the full DB bootstrap so no external SQL script is needed.
     Safe to run on every startup — all operations are idempotent.
     """
-    from app.models.base import Base  # noqa: F811
+    from app.models.base import Base
 
     async with engine.begin() as conn:
         await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))

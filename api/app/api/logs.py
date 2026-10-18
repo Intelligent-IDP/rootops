@@ -41,8 +41,10 @@ class LogIngestRequest(BaseModel):
         ...,
         description="Raw log text (plain text or JSON lines).",
         examples=[
-            "2024-03-01 12:00:00 ERROR payment.py:47 "
-            "NullPointerException: amount was None"
+            (
+                "2024-03-01 12:00:00 ERROR payment.py:47 "
+                "NullPointerException: amount was None"
+            )
         ],
     )
     service_name: str = Field(

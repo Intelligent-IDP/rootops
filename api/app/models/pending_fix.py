@@ -7,7 +7,7 @@ and are accessible from any API instance.
 Replaces the in-memory `_pending_fixes` dict in healer.py.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import Boolean, DateTime, Float, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
@@ -58,7 +58,7 @@ class PendingFix(Base):
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
         nullable=False,
     )
 
