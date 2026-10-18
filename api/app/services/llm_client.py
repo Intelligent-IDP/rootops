@@ -108,15 +108,17 @@ async def generate_ollama_stream(
     }
 
     try:
-        async with httpx.AsyncClient(base_url=settings.OLLAMA_BASE_URL, timeout=300.0) as client:
-            async with client.stream("POST", "/api/chat", json=payload) as response:
-                response.raise_for_status()
-                async for chunk in response.aiter_lines():
-                    if chunk:
-                        data = json.loads(chunk)
-                        msg = data.get("message", {}).get("content", "")
-                        if msg:
-                            yield msg
+        async with (
+            httpx.AsyncClient(base_url=settings.OLLAMA_BASE_URL, timeout=300.0) as client,
+            client.stream("POST", "/api/chat", json=payload) as response,
+        ):
+            response.raise_for_status()
+            async for chunk in response.aiter_lines():
+                if chunk:
+                    data = json.loads(chunk)
+                    msg = data.get("message", {}).get("content", "")
+                    if msg:
+                        yield msg
     except Exception as e:
         logger.error("Ollama streaming error: %s", e)
         yield f"\n\n[Error streaming from Ollama: {e}]"

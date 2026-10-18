@@ -18,6 +18,7 @@ The result is a set of LogConcept rows, each with:
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import logging
 import re
@@ -356,10 +357,8 @@ async def process_log_batch(
             # Seed Drain3 with the LLM-extracted template for next time
             miner = _get_drain(service_name)
             if miner:
-                try:
+                with contextlib.suppress(Exception):
                     miner.add_log_message(tmpl)
-                except Exception:
-                    pass
 
             concept = await _upsert_concept(
                 session, service_name, tmpl, None,

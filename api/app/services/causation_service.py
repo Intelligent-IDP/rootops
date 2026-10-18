@@ -200,7 +200,7 @@ async def _evaluate_promotion(session: AsyncSession, edge: GraphEdge) -> None:
     incident_count: int = ev.get("incident_count", edge.incident_count)
 
     # ── observed → correlates_with ─────────────────────────────
-    if current_rank < _LEVEL_RANK["correlates_with"]:
+    if current_rank < _LEVEL_RANK["correlates_with"]:  # noqa: SIM102 — one block per promotion step
         if incident_count >= 1 and samples:
             median_lag = _median(samples)
             if median_lag >= 0:
