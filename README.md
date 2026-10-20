@@ -272,9 +272,7 @@ For a single machine on a private network, Docker Compose is the supported deplo
 make up
 ```
 
-For a GCP VM with a Duck DNS hostname, the repository includes `deploy/cloud/deploy-gcp.sh`, which provisions the VM, configures Caddy for HTTPS, and restricts HTTP/HTTPS ingress to the deploying machine's detected public IPv4 address. Set `GCP_ALLOWED_CIDR` to a trusted VPN or office range to share access with a team. The application itself does **not** add user authentication; do not open ingress to the public internet. TLS protects traffic in transit, not who can use the API.
-
-Other cloud platforms and orchestrators require operator-managed networking, TLS, persistent PostgreSQL storage with pgvector, and access control. They are not one-command deployments today.
+Cloud platforms and orchestrators require operator-managed networking, TLS, persistent PostgreSQL storage with pgvector, and access control. They are not one-command deployments today.
 
 ---
 
