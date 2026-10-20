@@ -1,25 +1,26 @@
 @import "tailwindcss";
+@import "@xyflow/react/dist/style.css";
 
 /* ── RootOps Design Tokens ──────────────────────────────────── */
 @theme {
-  --color-bg: #060608;
-  --color-bg-card: rgba(10, 10, 14, 0.9);
-  --color-bg-input: rgba(255, 255, 255, 0.04);
-  --color-border: rgba(255, 255, 255, 0.07);
-  --color-border-hover: rgba(255, 255, 255, 0.14);
-  --color-text: #C8D2DF;
-  --color-text-muted: #7E8EA4;
-  --color-text-dim: #384455;
-  --color-text-bright: #EAF0F8;
-  --color-accent: #00D9F5;
-  --color-accent-dim: rgba(0, 217, 245, 0.1);
-  --color-accent-glow: rgba(0, 217, 245, 0.28);
-  --color-success: #10B981;
-  --color-warning: #F59E0B;
-  --color-error: #EF4444;
-  --color-info: #3B82F6;
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --color-bg: #0B100D;
+  --color-bg-card: #111813;
+  --color-bg-input: #0D140F;
+  --color-border: rgba(226, 241, 229, 0.09);
+  --color-border-hover: rgba(226, 241, 229, 0.16);
+  --color-text: #C6D0C8;
+  --color-text-muted: #A6B2A8;
+  --color-text-dim: #849188;
+  --color-text-bright: #F0F5F0;
+  --color-accent: #C8F169;
+  --color-accent-dim: rgba(200, 241, 105, 0.1);
+  --color-accent-glow: rgba(200, 241, 105, 0.2);
+  --color-success: #58D6A0;
+  --color-warning: #F3BD68;
+  --color-error: #FF7770;
+  --color-info: #78B9F3;
+  --font-sans: 'Manrope', 'Avenir Next', sans-serif;
+  --font-mono: 'IBM Plex Mono', 'SFMono-Regular', monospace;
 }
 
 /* ── Base ─────────────────────────────────────────────────────── */
@@ -32,23 +33,22 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-image: radial-gradient(
-    ellipse 120% 60% at 50% -5%,
-    rgba(0, 217, 245, 0.035) 0%,
-    transparent 65%
-  );
+  background-image:
+    linear-gradient(rgba(210, 235, 216, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(210, 235, 216, 0.018) 1px, transparent 1px);
+  background-size: 44px 44px;
   background-attachment: fixed;
 }
 
 /* ── Selection ──────────────────────────────────────────────── */
 ::selection {
-  background: rgba(0, 217, 245, 0.18);
+  background: rgba(200, 241, 105, 0.22);
   color: var(--color-text-bright);
 }
 
 /* ── Focus ──────────────────────────────────────────────────── */
 :focus-visible {
-  outline: 1.5px solid rgba(0, 217, 245, 0.4);
+  outline: 1.5px solid rgba(200, 241, 105, 0.55);
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -66,10 +66,10 @@ body {
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0px 1000px #0a0a0e inset;
+  -webkit-box-shadow: 0 0 0px 1000px #0d140f inset;
   -webkit-text-fill-color: var(--color-text);
   caret-color: var(--color-text);
-  border-color: rgba(0, 217, 245, 0.35) !important;
+  border-color: rgba(200, 241, 105, 0.35) !important;
 }
 
 /* ── Animations ─────────────────────────────────────────────── */
@@ -127,6 +127,6 @@ input[type="range"] {
 
 /* ── Select arrow color fix ─────────────────────────────────── */
 select option {
-  background: #0a0a0e;
+  background: #111813;
   color: var(--color-text);
 }

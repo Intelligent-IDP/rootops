@@ -22,7 +22,7 @@ RootOps is a developer intelligence platform that sits alongside your entire eng
 
 On a normal day, engineers use it to search code in natural language, understand unfamiliar services, review pull requests with full codebase context, trace log errors back to the exact lines that produced them, and map who knows what across the team. The understanding accumulates over time into a causal knowledge graph that connects services, code, errors, and contributors — so the platform becomes more useful the longer it runs, not just during incidents.
 
-It does all of this entirely on your own infrastructure. Your code, your logs, and your engineering history never leave your machine. That is a hard constraint that no cloud-based tool can match.
+RootOps can run entirely on your own infrastructure. In the default Docker Compose setup, code and logs are embedded locally and Ollama runs locally. If you configure a hosted LLM backend (OpenAI, Anthropic, Gemini, or Bedrock), retrieved code and log context is sent to that provider for synthesis. The optional GitHub integration also communicates with GitHub to create pull requests. Choose providers and network access to match your data-handling requirements.
 
 ---
 
@@ -38,30 +38,15 @@ It does all of this entirely on your own infrastructure. Your code, your logs, a
 
 ## Quick Start
 
-No source code required. Download the compose file and start:
-
-```bash
-curl -O https://raw.githubusercontent.com/Intelligent-IDP/rootops/main/docker-compose.yml
-curl -O https://raw.githubusercontent.com/Intelligent-IDP/rootops/main/.env.example
-cp .env.example .env
-docker compose up -d
-```
-
-Docker pulls the pre-built images from GitHub Container Registry and starts all four services. Open **http://localhost:3000** when the containers are healthy.
-
-The default configuration uses **Ollama** with Llama 3, free, fully local, no API key required.
-
-> On first run, Ollama needs to download the Llama 3 model (~4 GB). Run `docker compose exec ollama ollama pull llama3` after startup, or use `make up` (see below) which handles this automatically.
-
-### Using Make (recommended)
-
-If you have the repository cloned, `make up` handles everything — pulls latest images, starts services, and downloads the LLM model:
+The quickest path is Docker Compose. Clone the repository and let `make up` pull the application images and local Ollama model:
 
 ```bash
 git clone https://github.com/Intelligent-IDP/rootops.git
 cd rootops
 make up
 ```
+
+This creates `.env` from `.env.example`, pulls the pre-built images, starts the services, and downloads the configured Ollama model on first run. Open **http://localhost:3000** when startup completes. The default uses local Ollama and requires no provider API key.
 
 ### Use a cloud LLM (optional)
 
@@ -281,19 +266,15 @@ cd api && python -m pytest tests/ -v
 
 ## Deployment
 
-Docker Compose is the recommended deployment method:
+For a single machine on a private network, Docker Compose is the supported deployment path:
 
 ```bash
-docker compose up -d
+make up
 ```
 
-RootOps runs anywhere Docker is available:
+For a GCP VM with a Duck DNS hostname, the repository includes `deploy/cloud/deploy-gcp.sh`, which provisions the VM, configures Caddy for HTTPS, and restricts HTTP/HTTPS ingress to the deploying machine's detected public IPv4 address. Set `GCP_ALLOWED_CIDR` to a trusted VPN or office range to share access with a team. The application itself does **not** add user authentication; do not open ingress to the public internet. TLS protects traffic in transit, not who can use the API.
 
-- **Railway / Render:** deploy each service independently
-- **AWS ECS / GCP Cloud Run:** containerised deployment
-- **Kubernetes:** use the Docker images with your own manifests
-
-The only hard infrastructure requirement is **PostgreSQL with the pgvector extension**.
+Other cloud platforms and orchestrators require operator-managed networking, TLS, persistent PostgreSQL storage with pgvector, and access control. They are not one-command deployments today.
 
 ---
 

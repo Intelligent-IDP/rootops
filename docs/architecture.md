@@ -1,291 +1,140 @@
 # RootOps Architecture
 
-## Overview
-
-RootOps is built as a microservices-oriented application with clear separation of concerns:
-
-```
-┌──────────────────────────────────────────────────────┐
-│                   Client Layer                        │
-│  (HTTP Clients, Dashboards, CI/CD Integrations)      │
-└───────────────────────┬──────────────────────────────┘
-                        │
-┌───────────────────────▼──────────────────────────────┐
-│                  FastAPI Application                  │
-│                                                       │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐ │
-│  │   API       │  │ Monitoring  │  │  Database   │ │
-│  │  Routes     │  │ Middleware  │  │  Sessions   │ │
-│  └─────────────┘  └─────────────┘  └─────────────┘ │
-└───────────────────────┬──────────────────────────────┘
-                        │
-┌───────────────────────▼──────────────────────────────┐
-│                  Service Layer                        │
-│                                                       │
-│  ┌──────────────┐ ┌───────────┐ ┌──────────────┐   │
-│  │   Commit     │ │    Log    │ │    Trace     │   │
-│  │  Analyzer    │ │  Analyzer │ │   Analyzer   │   │
-│  └──────────────┘ └───────────┘ └──────────────┘   │
-│                                                       │
-│  ┌──────────────────────────────────────────────┐   │
-│  │           Optimizer Service                   │   │
-│  └──────────────────────────────────────────────┘   │
-└───────────────────────┬──────────────────────────────┘
-                        │
-┌───────────────────────▼──────────────────────────────┐
-│                   ML Model Layer                      │
-│                                                       │
-│  ┌──────────────┐ ┌───────────┐ ┌──────────────┐   │
-│  │  Breaking    │ │  Anomaly  │ │ Performance  │   │
-│  │   Change     │ │ Detector  │ │  Predictor   │   │
-│  │  Detector    │ │           │ │              │   │
-│  └──────────────┘ └───────────┘ └──────────────┘   │
-└───────────────────────┬──────────────────────────────┘
-                        │
-┌───────────────────────▼──────────────────────────────┐
-│                  Data Layer                           │
-│                                                       │
-│  ┌──────────────────────┐  ┌──────────────────────┐ │
-│  │   PostgreSQL DB      │  │  Optional: Redis     │ │
-│  │  (Analysis History)  │  │     (Caching)        │ │
-│  └──────────────────────┘  └──────────────────────┘ │
-└───────────────────────────────────────────────────────┘
-```
+RootOps is a self-hostable developer intelligence application. The web UI, API,
+and PostgreSQL database run as separate Docker Compose services. The API owns
+repository and log ingestion, retrieval, graph operations, and LLM dispatch.
 
 ## Components
 
-### 1. API Layer (`src/api/`)
+- **Next.js web app (`web/`)** provides the dashboard and calls the FastAPI API.
+- **FastAPI (`api/app/`)** exposes ingestion, query, log, graph, profile, PR
+  review, and auto-heal endpoints.
+- **Service layer (`api/app/services/`)** implements Git ingestion, chunking,
+  embeddings, retrieval and reranking, log processing, graph construction,
+  causation analysis, and LLM provider clients.
+- **PostgreSQL with pgvector** stores repositories, commits, code chunks, logs,
+  profiles, graph entities, and graph edges. Code and log embeddings use
+  pgvector `HALFVEC` columns (16-bit floating-point values).
+- **Ollama** is the default local LLM in Docker Compose. OpenAI, Anthropic,
+  Gemini, and AWS Bedrock can be selected explicitly.
 
-**Responsibility:** Handle HTTP requests and responses
+## Main Data Flows
 
-- **routes.py** - RESTful API endpoints
-- Request validation using Pydantic models
-- Response serialization
-- Error handling
+### Repository ingestion
 
-### 2. Service Layer (`src/services/`)
+1. The API receives a local repository path or Git URL.
+2. The Git ingestor reads files and commit history, chunks source, and creates
+   embeddings locally.
+3. Chunks, commits, and repository metadata are stored in PostgreSQL.
+4. Breadth scans code and infrastructure configuration to produce structural
+   service and dependency edges. When enabled and a supported LLM is available,
+   `scan --llm` also summarizes undocumented, highly connected nodes. The legacy
+   regex extractor is available as a fallback.
 
-**Responsibility:** Business logic and analysis
+RootOps stores Breadth's full flowgraph in `breadth_graph_snapshots` for the
+hierarchical Dependency Graph UI, while separately rolling service-level
+structural edges into the knowledge graph for causation and blast-radius queries.
 
-- **CommitAnalyzer** - Git commit analysis (Local + GitHub)
-- **GitLocalService** - Direct analysis of local git repository
-- **LogAnalyzer** - Log aggregation and anomaly detection
-- **TraceAnalyzer** - Distributed trace analysis
-- **Optimizer** - Recommendation generation
+The Cloud Run configuration explicitly enables dependency extraction and selects
+Breadth, overriding the low-memory default that otherwise skips graph creation.
+Existing repositories must be re-ingested after enabling it to create a snapshot.
+Graph nodes can be dragged within the current view; Reset node layout restores
+the automatic layout. Positions are not persisted across reloads or filters.
 
-Each service is independent and can be tested in isolation.
+### Query
 
-### 3. Model Layer (`src/models/`)
+1. The API embeds the question and retrieves relevant code and log records from
+   pgvector, optionally using query planning and reranking.
+2. With the default Ollama configuration, retrieved context is synthesized by
+   the local model. When a hosted provider is configured, retrieved context is
+   sent to that provider. Raw vector search is also available without LLM
+   synthesis.
+3. The API returns an answer with source chunks, log matches, and retrieval
+   metadata.
 
-**Responsibility:** Machine learning and data models
+### Logs and causation
 
-- **MLPredictor** - Real Scikit-Learn RandomForest model
-- **predictions.py** - Heuristic models & ML interfaces
-- **db_models.py** - SQLAlchemy database models
-- **requests.py** - Pydantic request/response schemas
+Logs can be submitted through the API or the OTLP/HTTP receiver. They are
+filtered, deduplicated, embedded, and stored alongside code. Structural graph
+edges describe how services are wired; causal edges represent evidence-based
+relationships and are maintained separately.
 
-### 4. Infrastructure Layer
+The homepage System Health section polls `GET /api/ingest/logs/health` every
+30 seconds. It summarizes up to 500 retained events from the last hour and
+exposes up to 20 recent evidence records. Severity filters, deduplication, and
+rate limits apply before storage, so these counts are not request error rates
+or availability measurements. An incomplete sample is explicitly flagged.
 
-**Responsibility:** Cross-cutting concerns
+Events with `synthetic=true` metadata or reserved `mock-` service names are
+separated from live health assessment. Shared `request_id` values group related
+events, but do not establish causation, dependency direction, or a full trace.
+No errors, no telemetry, and synthetic-only telemetry are reported as
+insufficient evidence, never as proof of a healthy system. This view does not
+overlay runtime calls onto the static Breadth map; that requires span ingestion
+and trace-to-graph mapping.
 
-- **config.py** - Configuration management
-- **database.py** - Database connection pooling
-- **monitoring.py** - Prometheus metrics
+Live service evidence is shown first. Synthetic services, correlation groups,
+and their analysis are kept inside a **Demo evidence** section collapsed by default.
 
-## Data Flow
+Each live service has an **Analyze live evidence** action using
+`POST /api/ingest/logs/live-analysis`. It accepts 1–20 event UUIDs from a single
+live service, an optional `repo_id`, and optional `use_llm` (default `true`).
+Synthetic, missing, and mixed-service evidence is rejected. Only the selected
+log messages and up to three code excerpts from the explicitly selected
+repository are passed to the configured LLM; personal log metadata and global
+log retrieval are not included. Code references identify possible paths, not
+proof of execution. Provider or source-lookup failures leave an explicitly
+labelled evidence-only or logs-only result. This does not change health status,
+confirm causation, or apply fixes.
 
-### Commit Analysis Flow
+Synthetic correlation groups expose an **Analyze scenario** action through
+`POST /api/ingest/logs/mock-analysis`, accepting 2–20 event UUIDs and optional
+`use_llm` (default `true`). The API requires every selected record to be
+synthetic and to share a nonempty request ID. Only those selected log records
+are sent to the configured LLM; no global retrieval or production evidence is
+included. Responses contain a chronological evidence timeline and either an
+LLM interpretation or an explicitly labelled evidence-only fallback if the
+provider is unavailable, fails, or exceeds 30 seconds. This analysis does not
+promote causal edges, apply fixes, or change live system health.
 
-```
-1. Client sends POST /api/v1/analyze/commit
-   ↓
-2. API validates request (Pydantic)
-   ↓
-3. CommitAnalyzer extracts features
-   ↓
-4. BreakingChangeDetector predicts risk
-   ↓
-5. Optional: LLM enrichment (Gemini API)
-   ↓
-6. Result stored in PostgreSQL
-   ↓
-7. Response returned to client
-```
+## Data and Privacy Boundaries
 
-### Log Analysis Flow
+The default Compose configuration runs the database, embeddings, and Ollama
+locally. Selecting a hosted LLM sends the context needed for that request to
+the selected provider. The optional GitHub integration communicates with
+GitHub for repository operations and pull-request creation. Model weights may
+be downloaded from their configured registries during setup.
 
-```
-1. Client sends POST /api/v1/analyze/logs
-   ↓
-2. API validates log entries
-   ↓
-3. LogAnalyzer aggregates metrics
-   ↓
-4. AnomalyDetector identifies patterns
-   ↓
-5. Anomalies classified by severity
-   ↓
-6. Result stored and returned
-```
+Breadth LLM summaries are enabled by default when the selected RootOps provider
+is available. They send source excerpts for up to 50 code nodes to that provider;
+set `BREADTH_LLM_ENABLED=false` to disable them. Breadth's built-in providers
+support Ollama, OpenAI, Anthropic, Gemini, and OpenAI-compatible endpoints;
+AWS Bedrock is not currently wired to Breadth's LLM provider.
 
-## Design Principles
+The API does not currently provide user authentication. Caddy in the optional
+cloud deployment provides HTTPS, not access control. Keep deployments on a
+trusted private network or add an external authentication and network boundary
+before exposing them publicly.
 
-### 1. **Separation of Concerns**
-Each layer has a specific responsibility and doesn't cross boundaries.
+## Deployment and Operations
 
-### 2. **Dependency Injection**
-Services are injected via FastAPI's dependency system for testability.
+- **Local or private single machine:** `make up` creates the default `.env`,
+  pulls the application images, starts Docker Compose, and downloads the
+  configured Ollama model.
+- **GCP VM:** `deploy/cloud/deploy-gcp.sh` provisions a VM and configures
+   Caddy/HTTPS with Duck DNS. Ingress is restricted to the deploying machine's
+   detected public IPv4 by default; set `GCP_ALLOWED_CIDR` for a trusted VPN or
+   office network. The application itself does not provide user authentication.
+- **Other platforms:** operators must provide persistent PostgreSQL with
+  pgvector, secure networking, TLS, and authentication.
 
-### 3. **Async by Default**
-All I/O operations use `async/await` for better performance.
+The current stack performs ingestion in the API service; there is no separate
+job queue or worker tier. PostgreSQL is the persistent source of truth.
 
-### 4. **Type Safety**
-Pydantic models ensure type safety across API boundaries.
+## Vector Storage
 
-### 5. **Observability First**
-Prometheus metrics at every layer for debugging and monitoring.
-
-## Database Schema
-
-```sql
--- Commit Analysis Results
-CREATE TABLE commit_analyses (
-    id SERIAL PRIMARY KEY,
-    repository VARCHAR NOT NULL,
-    commit_hash VARCHAR NOT NULL,
-    changed_files INTEGER,
-    lines_added INTEGER,
-    lines_deleted INTEGER,
-    risky_patterns JSONB,
-    complexity_delta FLOAT,
-    breaking_change_score FLOAT,
-    semantic_risk_score FLOAT,
-    semantic_summary TEXT,
-    created_at TIMESTAMP DEFAULT NOW()
-);
-
--- Log Analysis Results
-CREATE TABLE log_analyses (
-    id SERIAL PRIMARY KEY,
-    log_count INTEGER,
-    error_count INTEGER,
-    warning_count INTEGER,
-    anomalies JSONB,
-    spike_score FLOAT,
-    created_at TIMESTAMP DEFAULT NOW()
-);
-
--- Trace Analysis Results
-CREATE TABLE trace_analyses (
-    id SERIAL PRIMARY KEY,
-    service_name VARCHAR,
-    trace_count INTEGER,
-    slow_traces JSONB,
-    bottlenecks JSONB,
-    p95_latency FLOAT,
-    created_at TIMESTAMP DEFAULT NOW()
-);
-
--- Optimization Recommendations
-CREATE TABLE optimizations (
-    id SERIAL PRIMARY KEY,
-    type VARCHAR,
-    severity VARCHAR,
-    title VARCHAR,
-    description TEXT,
-    impact VARCHAR,
-    auto_fixable BOOLEAN,
-    applied BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT NOW()
-);
-```
-
-## Scaling Considerations
-
-### Horizontal Scaling
-
-RootOps is stateless and can be scaled horizontally:
-
-```yaml
-# Kubernetes example
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: rootops
-spec:
-  replicas: 3  # Scale to 3 instances
-```
-
-### Database Scaling
-
-- Use PostgreSQL read replicas for query-heavy workloads
-- Implement connection pooling (already configured)
-- Archive old analysis results to cold storage
-
-### Caching
-
-- Redis can be added for frequently accessed data
-- ML model predictions can be cached
-
-## Security
-
-### Authentication
-
-Configure via environment variables:
-
-```bash
-# Future: JWT authentication
-JWT_SECRET_KEY=your-secret-key
-JWT_ALGORITHM=HS256
-```
-
-### Data Protection
-
-- All database connections use SSL in production
-- Sensitive data (API keys) stored in environment variables
-- No logging of sensitive information
-
-## Performance
-
-### Benchmarks
-
-On a 2-core, 4GB RAM instance:
-
-- **Commit Analysis**: ~50ms average
-- **Log Analysis** (100 logs): ~80ms average
-- **Trace Analysis** (1000 traces): ~150ms average
-
-### Optimization Tips
-
-1. Use database indexes on frequently queried fields
-2. Implement request caching for repeated queries
-3. Batch multiple analyses in single request
-4. Use async clients for external API calls
-
-## Monitoring
-
-### Key Metrics
-
-- `rootops_http_requests_total` - Request count
-- `rootops_predictions_total` - ML predictions
-- `rootops_http_request_duration_seconds` - Latency
-
-### Alerts
-
-Recommended Prometheus alerts:
-
-```yaml
-- alert: HighErrorRate
-  expr: rate(rootops_http_requests_total{status=~"5.."}[5m]) > 0.05
-  
-- alert: SlowResponses
-  expr: histogram_quantile(0.95, rootops_http_request_duration_seconds) > 1
-```
-
-## Future Enhancements
-
-- [ ] Real-time streaming analysis
-- [ ] Custom ML model training
-- [ ] Multi-tenancy support
-- [ ] GraphQL API
-- [ ] Webhook notifications
+Embeddings are currently stored as 16-bit `HALFVEC` values and queried through
+pgvector. TurboQuant or another lower-bit quantizer should be considered only
+after measuring storage or retrieval as a bottleneck on representative data,
+and validating recall and query latency against the current half-precision
+baseline. It is not enabled in the current architecture.

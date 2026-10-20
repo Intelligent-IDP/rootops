@@ -201,6 +201,25 @@ def _dependency_type(edge: StructuralEdge) -> str | None:
     return None
 
 
+async def _persist_flowgraph_snapshot(
+    session: AsyncSession,
+    flowgraph: dict,
+    repo_id: uuid.UUID | None,
+) -> None:
+    """Replace the repository's detailed Breadth graph snapshot."""
+    if repo_id is None:
+        return
+
+    from app.models.breadth_graph_snapshot import BreadthGraphSnapshot
+
+    snapshot = await session.get(BreadthGraphSnapshot, repo_id)
+    if snapshot is None:
+        session.add(BreadthGraphSnapshot(repo_id=repo_id, flowgraph=flowgraph))
+    else:
+        snapshot.flowgraph = flowgraph
+        snapshot.scanned_at = datetime.now(UTC)
+
+
 # ── Running the Breadth CLI ───────────────────────────────────────
 
 def breadth_command() -> list[str] | None:
@@ -213,30 +232,90 @@ def breadth_command() -> list[str] | None:
     return [found] if found else None
 
 
+def _breadth_llm_options(settings) -> tuple[list[str], dict[str, str]]:
+    """Configure Breadth's optional summaries from the selected RootOps LLM."""
+    if not settings.BREADTH_LLM_ENABLED or not settings.LLM_AVAILABLE:
+        return [], {}
+
+    backend = settings.LLM_BACKEND.lower()
+    providers = {
+        "ollama": ("ollama", settings.OLLAMA_MODEL, settings.OLLAMA_BASE_URL),
+        "openai": ("openai", settings.OPENAI_MODEL, None),
+        "anthropic": ("anthropic", settings.ANTHROPIC_MODEL, None),
+        "gemini": ("gemini", settings.GEMINI_MODEL, None),
+    }
+    configured = providers.get(backend)
+    if configured is None:
+        logger.warning(
+            "Breadth LLM summaries are unavailable for LLM_BACKEND=%s",
+            backend,
+        )
+        return [], {}
+
+    provider, model, base_url = configured
+    env = {
+        "BREADTH_LLM_PROVIDER": provider,
+        "BREADTH_LLM_MODEL": model,
+    }
+    if base_url:
+        env["BREADTH_LLM_BASE_URL"] = base_url
+    key_names = {
+        "openai": "OPENAI_API_KEY",
+        "anthropic": "ANTHROPIC_API_KEY",
+        "gemini": "GEMINI_API_KEY",
+    }
+    key_name = key_names.get(backend)
+    if key_name:
+        key = getattr(settings, key_name)
+        if key:
+            env[key_name] = key
+    return ["--llm"], env
+
+
 async def scan_repository(repo_path: str) -> dict | None:
     """Run `breadth scan` on a checked-out repository and return the flowgraph."""
     cmd = breadth_command()
     if not cmd:
         return None
-    timeout = get_settings().BREADTH_SCAN_TIMEOUT_SECONDS
+    settings = get_settings()
+    timeout = settings.BREADTH_SCAN_TIMEOUT_SECONDS
+    llm_args, llm_env = _breadth_llm_options(settings)
     with tempfile.TemporaryDirectory(prefix="breadth-") as tmp:
         out = os.path.join(tmp, "flowgraph.json")
-        proc = await asyncio.create_subprocess_exec(
-            *cmd, "scan", repo_path, "-o", out,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
-        try:
-            _, stderr = await asyncio.wait_for(
-                proc.communicate(), timeout=timeout
+        async def run_scan(args: list[str], env: dict[str, str]) -> tuple[int, bytes]:
+            proc = await asyncio.create_subprocess_exec(
+                *args,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                env=env,
             )
-        except TimeoutError:
-            proc.kill()
-            await proc.wait()
-            logger.warning("breadth scan timed out after %ss", timeout)
-            return None
-        if proc.returncode != 0 or not os.path.exists(out):
-            logger.warning("breadth scan failed (%s): %s", proc.returncode, stderr.decode()[-500:])
+            try:
+                _, stderr = await asyncio.wait_for(proc.communicate(), timeout=timeout)
+            except TimeoutError:
+                proc.kill()
+                await proc.wait()
+                return -1, f"timed out after {timeout}s".encode()
+            return proc.returncode or 0, stderr
+
+        scan_args = [*cmd, "scan", repo_path, "-o", out]
+        return_code, stderr = await run_scan(
+            [*scan_args, *llm_args],
+            {**os.environ, **llm_env},
+        )
+        if return_code != 0 and llm_args:
+            logger.warning(
+                "Breadth scan with LLM summaries failed (%s); retrying without LLM: %s",
+                return_code,
+                stderr.decode(errors="replace")[-500:],
+            )
+            return_code, stderr = await run_scan(scan_args, os.environ.copy())
+
+        if return_code != 0 or not os.path.exists(out):
+            logger.warning(
+                "breadth scan failed (%s): %s",
+                return_code,
+                stderr.decode(errors="replace")[-500:],
+            )
             return None
         return await asyncio.to_thread(_read_json, out)
 
@@ -267,6 +346,7 @@ async def import_flowgraph(
     if flowgraph.get("version") != "1.0" or not isinstance(flowgraph.get("nodes"), list):
         raise ValueError("not a Breadth flowgraph (expected version 1.0 with nodes and edges)")
 
+    await _persist_flowgraph_snapshot(session, flowgraph, repo_id)
     graph = roll_up(flowgraph)
     now = datetime.now(UTC)
     repo_key = str(repo_id) if repo_id else repo_name

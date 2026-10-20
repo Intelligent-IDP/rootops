@@ -41,7 +41,7 @@ async def generate_gemini(
 
         contents.append(types.Content(role="user", parts=[types.Part.from_text(text=prompt)]))
 
-        response = client.models.generate_content(
+        response = await client.aio.models.generate_content(
             model=settings.GEMINI_MODEL,
             contents=contents,
             config=types.GenerateContentConfig(

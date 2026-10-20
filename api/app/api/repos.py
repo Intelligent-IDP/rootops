@@ -22,7 +22,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import get_db
-from app.models.repository import Repository
+from app.models.codebase_summary import CodebaseSummary
+from app.models.repository import LEGACY_REPO_ID, Repository
 from app.models.service_dependency import ServiceDependency
 
 logger = logging.getLogger(__name__)
@@ -76,7 +77,9 @@ async def list_repositories(session: AsyncSession = Depends(get_db)):
     """List all registered repositories, newest first."""
     rows = (
         await session.execute(
-            select(Repository).order_by(Repository.created_at.desc())
+            select(Repository)
+            .where(Repository.id != LEGACY_REPO_ID)
+            .order_by(Repository.created_at.desc())
         )
     ).scalars().all()
     return [_repo_to_summary(r) for r in rows]
@@ -90,7 +93,9 @@ async def get_dependency_graph(session: AsyncSession = Depends(get_db)):
     Unresolved targets (services not yet ingested) appear as orphan targets
     in edge data but are NOT included as nodes to keep the graph clean.
     """
-    repos = (await session.execute(select(Repository))).scalars().all()
+    repos = (await session.execute(
+        select(Repository).where(Repository.id != LEGACY_REPO_ID)
+    )).scalars().all()
     deps  = (await session.execute(select(ServiceDependency))).scalars().all()
 
     # Build a set of known repo IDs to filter edges
@@ -126,6 +131,32 @@ async def get_dependency_graph(session: AsyncSession = Depends(get_db)):
             ))
 
     return DependencyGraph(nodes=nodes, edges=edges)
+
+
+@router.get("/summaries")
+async def list_codebase_summaries(session: AsyncSession = Depends(get_db)):
+    """Return saved plain-language architecture summaries for indexed repos."""
+    rows = (await session.execute(
+        select(
+            Repository.id,
+            Repository.name,
+            CodebaseSummary.summary,
+            CodebaseSummary.chunk_count,
+            CodebaseSummary.generated_at,
+        )
+        .join(CodebaseSummary, CodebaseSummary.repo_id == Repository.id)
+        .order_by(Repository.name)
+    )).all()
+    return [
+        {
+            "repo_id": str(row.id),
+            "repository_name": row.name,
+            "summary": row.summary,
+            "chunk_count": row.chunk_count,
+            "generated_at": row.generated_at.isoformat(),
+        }
+        for row in rows
+    ]
 
 
 @router.get("/{repo_id}", response_model=RepoSummary)

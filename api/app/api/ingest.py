@@ -30,14 +30,14 @@ from app.db import async_session, get_db
 from app.models.code_chunk import CodeChunk
 from app.models.commit import Commit
 from app.models.ingestion_state import IngestionState
-from app.models.repository import Repository
+from app.models.repository import LEGACY_REPO_ID, Repository
 from app.services.git_ingestor import clone_and_ingest, ingest_repository
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/ingest", tags=["ingestion"])
 
 # ── Legacy singleton used by auto-ingest path ─────────────────────
-_LEGACY_REPO_ID = uuid.UUID("00000000-0000-0000-0000-000000000010")
+_LEGACY_REPO_ID = LEGACY_REPO_ID
 
 
 # ── DB helpers ────────────────────────────────────────────────────
@@ -282,6 +282,16 @@ async def get_ingestion_status(
     """
     total_commits = (await session.execute(select(func.count(Commit.id)))).scalar() or 0
     total_chunks  = (await session.execute(select(func.count(CodeChunk.id)))).scalar() or 0
+    indexed_files = (
+        await session.execute(
+            select(func.count()).select_from(
+                select(CodeChunk.repo_id, CodeChunk.file_path)
+                .where(CodeChunk.repo_id != LEGACY_REPO_ID)
+                .distinct()
+                .subquery()
+            )
+        )
+    ).scalar() or 0
 
     # Find the most recently active ingestion state
     latest = (
@@ -299,6 +309,7 @@ async def get_ingestion_status(
     merged_stats = {
         "commits_ingested": total_commits,
         "chunks_ingested":  total_chunks,
+        "files_indexed": indexed_files,
         "files_processed":  last_stats.get("files_processed", 0),
     }
 

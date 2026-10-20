@@ -15,6 +15,8 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base
 
+LEGACY_REPO_ID = uuid.UUID("00000000-0000-0000-0000-000000000010")
+
 
 class Repository(Base):
     """A registered git repository in the platform."""

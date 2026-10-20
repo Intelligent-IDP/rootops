@@ -21,7 +21,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rootops}
       POSTGRES_DB: ${POSTGRES_DB:-rootops}
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "127.0.0.1:${DB_PORT:-5432}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -36,7 +36,7 @@ services:
     container_name: rootops-ollama
     restart: unless-stopped
     ports:
-      - "${OLLAMA_PORT:-11434}:11434"
+      - "127.0.0.1:${OLLAMA_PORT:-11434}:11434"
     volumes:
       - ollama_data:/root/.ollama
     healthcheck:
@@ -63,7 +63,8 @@ services:
       # Override via LLM_BACKEND in .env. On small VMs, set an API key:
       #   OPENAI_API_KEY=sk-...  or  ANTHROPIC_API_KEY=sk-ant-...
       # To force local Ollama on a small VM: FORCE_OLLAMA=true
-      LLM_BACKEND: ${LLM_BACKEND:-}
+      LLM_BACKEND: ${LLM_BACKEND:-ollama}
+      BREADTH_LLM_ENABLED: ${BREADTH_LLM_ENABLED:-true}
 
       # Ollama (default on ≥8 GB — runs locally, no API key needed)
       OLLAMA_BASE_URL: http://ollama:11434
@@ -76,6 +77,10 @@ services:
       # Anthropic (optional — set ANTHROPIC_API_KEY in .env)
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-sonnet-4-6}
+
+      # Gemini (optional — set GEMINI_API_KEY in .env)
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.8-flash}
 
       # AWS Bedrock (optional — requires AWS credentials)
       BEDROCK_MODEL_ID: ${BEDROCK_MODEL_ID:-eu.anthropic.claude-sonnet-4-6}
@@ -103,7 +108,7 @@ services:
       #   EMBED_MAX_SEQ_LENGTH=256
       #   DISABLE_CODEBASE_SUMMARY=true
     ports:
-      - "${API_PORT:-8000}:8000"
+      - "127.0.0.1:${API_PORT:-8000}:8000"
     volumes:
       # HuggingFace model cache — persisted on host so the embedding model
       # (~600 MB) is only downloaded once across container rebuilds
@@ -123,7 +128,7 @@ services:
       NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: "1"
     ports:
-      - "${WEB_PORT:-3000}:3000"
+      - "127.0.0.1:${WEB_PORT:-3000}:3000"
 
 volumes:
   pgdata:

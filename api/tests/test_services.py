@@ -14,6 +14,10 @@ Coverage:
 
 from __future__ import annotations
 
+import asyncio
+import sys
+from types import ModuleType, SimpleNamespace
+
 import pytest
 
 
@@ -41,6 +45,59 @@ class TestComputeConfidence:
     def test_score_never_negative(self):
         score = self._call(0.0, 0, "")
         assert score >= 0.0
+
+
+class TestGeminiClient:
+    @pytest.mark.anyio
+    async def test_generate_uses_async_google_client(self, monkeypatch):
+        generated: list[dict] = []
+
+        async def generate_content(**kwargs):
+            generated.append(kwargs)
+            await asyncio.sleep(0)
+            return SimpleNamespace(text="Gemini test response")
+
+        class FakeClient:
+            def __init__(self, api_key):
+                assert api_key == "test-key"
+                self.aio = SimpleNamespace(
+                    models=SimpleNamespace(generate_content=generate_content),
+                )
+
+        class FakePart:
+            @staticmethod
+            def from_text(*, text):
+                return text
+
+        class FakeContent:
+            def __init__(self, *, role, parts):
+                self.role = role
+                self.parts = parts
+
+        class FakeGenerateConfig:
+            def __init__(self, **kwargs):
+                self.options = kwargs
+
+        google_module = ModuleType("google")
+        genai_module = ModuleType("google.genai")
+        types_module = ModuleType("google.genai.types")
+        genai_module.Client = FakeClient
+        genai_module.types = types_module
+        types_module.Content = FakeContent
+        types_module.Part = FakePart
+        types_module.GenerateContentConfig = FakeGenerateConfig
+        google_module.genai = genai_module
+        monkeypatch.setitem(sys.modules, "google", google_module)
+        monkeypatch.setitem(sys.modules, "google.genai", genai_module)
+        monkeypatch.setitem(sys.modules, "google.genai.types", types_module)
+
+        from app.services import gemini_client
+
+        monkeypatch.setattr(gemini_client.settings, "GEMINI_API_KEY", "test-key")
+        response = await gemini_client.generate_gemini("prompt", "system")
+
+        assert response == "Gemini test response"
+        assert len(generated) == 1
 
 
 class TestTrustLadder:

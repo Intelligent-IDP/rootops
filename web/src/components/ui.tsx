@@ -17,9 +17,9 @@ export function PageHeader({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-wrap items-start justify-between gap-3 pb-6 mb-7 border-b border-white/[0.055]">
+    <div className="flex flex-wrap items-start justify-between gap-3 pb-6 mb-7 border-b border-white/[0.08]">
       <div className="min-w-0">
-        <h1 className="text-[21px] font-bold tracking-tight text-text-bright leading-tight">
+        <h1 className="text-[24px] font-bold tracking-normal text-text-bright leading-tight">
           {title}
         </h1>
         {subtitle && (
@@ -37,7 +37,7 @@ export function PageHeader({
 
 export function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <div className="text-[11px] font-semibold uppercase tracking-[0.1em] text-text-dim mb-3 select-none">
+    <div className="text-[10px] font-bold uppercase tracking-[0.13em] text-text-muted mb-3 select-none">
       {children}
     </div>
   );
@@ -59,11 +59,10 @@ export function Metric({
   return (
     <div
       className={clsx(
-        "relative rounded-[12px] px-4 py-3.5 border transition-all duration-200 overflow-hidden group",
-        "hover:-translate-y-px",
+        "relative rounded-lg px-4 py-4 border transition-colors duration-150 overflow-hidden group",
         accent
-          ? "bg-accent/[0.05] border-accent/[0.18] hover:border-accent/30"
-          : "bg-[rgba(8,8,12,0.8)] border-white/[0.07] hover:border-white/[0.13]"
+          ? "bg-accent/[0.07] border-accent/[0.2] hover:border-accent/35"
+          : "bg-bg-card border-white/[0.08] hover:border-white/[0.15]"
       )}
     >
       {accent && (
@@ -158,7 +157,7 @@ export function StatusBadge({
 }) {
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border ${STATUS_CLASSES[variant] ?? STATUS_CLASSES.default}`}
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide border ${STATUS_CLASSES[variant] ?? STATUS_CLASSES.default}`}
     >
       {label}
     </span>
@@ -179,10 +178,10 @@ export function Card({
   return (
     <div
       className={clsx(
-        "rounded-[14px] border transition-all duration-200 overflow-hidden",
+        "rounded-lg border transition-colors duration-150 overflow-hidden",
         variant === "inset"
-          ? "bg-white/[0.015] border-white/[0.045] p-5"
-          : "bg-[rgba(8,8,12,0.8)] border-white/[0.07] p-5 backdrop-blur-sm hover:border-white/[0.12]",
+          ? "bg-white/[0.02] border-white/[0.07] p-5"
+          : "bg-bg-card border-white/[0.08] p-5 hover:border-white/[0.14]",
         className
       )}
     >
@@ -235,16 +234,15 @@ export function Button({
     <button
       disabled={disabled}
       className={clsx(
-        "inline-flex items-center justify-center gap-2 font-semibold tracking-wide transition-all duration-150 select-none whitespace-nowrap",
+        "inline-flex items-center justify-center gap-2 font-semibold tracking-normal transition-all duration-150 select-none whitespace-nowrap",
         size === "sm"
-          ? "px-3.5 py-1.5 rounded-lg text-[11.5px]"
-          : "px-5 py-2.5 rounded-xl text-[12.5px]",
+          ? "px-3.5 py-2 rounded-md text-[11.5px]"
+          : "px-5 py-2.5 rounded-lg text-[12.5px]",
         variant === "primary" && [
-          "bg-gradient-to-r from-[#00C2DC] to-[#1B44C8] text-white",
-          "shadow-[0_1px_0_rgba(255,255,255,0.08)_inset,0_0_0_1px_rgba(0,194,220,0.12)]",
-          "hover:brightness-110 hover:-translate-y-px hover:shadow-[0_0_18px_rgba(0,194,220,0.22)]",
+          "bg-accent text-[#192110]",
+          "hover:brightness-105 hover:-translate-y-px",
           "active:translate-y-0 active:brightness-100",
-          "disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:brightness-100 disabled:hover:shadow-none",
+          "disabled:opacity-35 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:brightness-100",
         ],
         variant === "secondary" && [
           "bg-white/[0.04] text-text border border-white/[0.09]",

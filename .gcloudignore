@@ -1,0 +1,16 @@
+*
+!api/
+!api/app/
+!api/app/**
+!web/
+!web/**
+!deploy/
+!deploy/cloud/
+!deploy/cloud/**
+**/.env*
+**/node_modules/**
+**/.next/**
+**/.git/**
+**/.vercel/**
+**/__pycache__/**
+**/*.pyc

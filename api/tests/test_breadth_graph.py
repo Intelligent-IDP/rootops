@@ -9,7 +9,12 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from app.services.breadth_graph import _dependency_type, roll_up
+from app.services.breadth_graph import (
+    _breadth_llm_options,
+    _dependency_type,
+    _persist_flowgraph_snapshot,
+    roll_up,
+)
 
 FIXTURE = Path(__file__).parent / "fixtures" / "breadth_shop.flowgraph.json"
 
@@ -79,6 +84,180 @@ def test_dependency_types_for_dashboard():
 def test_empty_graph():
     g = roll_up({"version": "1.0", "nodes": [], "edges": []})
     assert g.entities == {} and g.edges == []
+
+
+@pytest.mark.anyio
+async def test_persists_full_breadth_flowgraph():
+    import uuid
+
+    from unittest.mock import AsyncMock, MagicMock
+
+    from app.models.breadth_graph_snapshot import BreadthGraphSnapshot
+
+    session = MagicMock()
+    session.get = AsyncMock(return_value=None)
+    session.add = MagicMock()
+    repo_id = uuid.uuid4()
+    flowgraph = {"version": "1.0", "nodes": [{"id": "function:main"}], "edges": []}
+
+    await _persist_flowgraph_snapshot(session, flowgraph, repo_id)
+
+    session.get.assert_awaited_once_with(BreadthGraphSnapshot, repo_id)
+    stored = session.add.call_args.args[0]
+    assert stored.repo_id == repo_id
+    assert stored.flowgraph == flowgraph
+
+
+def test_breadth_llm_uses_selected_ollama_backend():
+    from app.config import get_settings
+
+    settings = get_settings().model_copy(update={
+        "BREADTH_LLM_ENABLED": True,
+        "LLM_BACKEND": "ollama",
+        "OLLAMA_MODEL": "qwen2.5-coder",
+        "OLLAMA_BASE_URL": "http://ollama:11434",
+    })
+    args, env = _breadth_llm_options(settings)
+
+    assert args == ["--llm"]
+    assert env == {
+        "BREADTH_LLM_PROVIDER": "ollama",
+        "BREADTH_LLM_MODEL": "qwen2.5-coder",
+        "BREADTH_LLM_BASE_URL": "http://ollama:11434",
+    }
+
+
+def test_breadth_llm_forwards_selected_remote_provider_key():
+    from app.config import get_settings
+
+    settings = get_settings().model_copy(update={
+        "BREADTH_LLM_ENABLED": True,
+        "LLM_BACKEND": "gemini",
+        "GEMINI_API_KEY": "test-key",
+        "GEMINI_MODEL": "gemini-test",
+    })
+    args, env = _breadth_llm_options(settings)
+
+    assert args == ["--llm"]
+    assert env["BREADTH_LLM_PROVIDER"] == "gemini"
+    assert env["BREADTH_LLM_MODEL"] == "gemini-test"
+    assert env["GEMINI_API_KEY"] == "test-key"
+
+
+def test_breadth_llm_skips_unavailable_and_unsupported_backends():
+    from app.config import get_settings
+
+    settings = get_settings().model_copy(update={
+        "BREADTH_LLM_ENABLED": True,
+        "LLM_BACKEND": "openai",
+        "OPENAI_API_KEY": "",
+    })
+    assert _breadth_llm_options(settings) == ([], {})
+
+    bedrock = settings.model_copy(update={"LLM_BACKEND": "bedrock"})
+    assert _breadth_llm_options(bedrock) == ([], {})
+
+
+@pytest.mark.anyio
+async def test_scan_passes_selected_llm_to_breadth_cli():
+    from app.services import breadth_graph
+    from app.config import get_settings
+
+    settings = get_settings().model_copy(update={
+        "BREADTH_LLM_ENABLED": True,
+        "LLM_BACKEND": "ollama",
+        "OLLAMA_MODEL": "qwen2.5-coder",
+        "OLLAMA_BASE_URL": "http://ollama:11434",
+    })
+    flowgraph = {"version": "1.0", "nodes": [], "edges": []}
+
+    class CompletedScan:
+        returncode = 0
+
+        async def communicate(self):
+            return b"", b""
+
+    async def fake_create_subprocess_exec(*args, **_kwargs):
+        assert "stdout" in _kwargs and "stderr" in _kwargs
+        assert "BREADTH_LLM_PROVIDER" in _kwargs["env"]
+        output_path = args[args.index("-o") + 1]
+        Path(output_path).write_text(json.dumps(flowgraph), encoding="utf-8")
+        return CompletedScan()
+
+    with (
+        patch.object(breadth_graph, "get_settings", return_value=settings),
+        patch.object(breadth_graph, "breadth_command", return_value=["breadth"]),
+        patch.object(
+            breadth_graph.asyncio,
+            "create_subprocess_exec",
+            new_callable=AsyncMock,
+            side_effect=fake_create_subprocess_exec,
+        ) as create_process,
+    ):
+        result = await breadth_graph.scan_repository("/repo")
+
+    assert result == flowgraph
+    call = create_process.await_args
+    assert call is not None
+    assert "--llm" in call.args
+    assert call.kwargs["env"]["BREADTH_LLM_PROVIDER"] == "ollama"
+    assert call.kwargs["env"]["BREADTH_LLM_MODEL"] == "qwen2.5-coder"
+
+
+@pytest.mark.anyio
+async def test_scan_retries_without_llm_when_provider_fails():
+    from app.services import breadth_graph
+    from app.config import get_settings
+
+    settings = get_settings().model_copy(update={
+        "BREADTH_LLM_ENABLED": True,
+        "LLM_BACKEND": "ollama",
+        "OLLAMA_MODEL": "qwen2.5-coder",
+        "OLLAMA_BASE_URL": "http://ollama:11434",
+    })
+    flowgraph = {"version": "1.0", "nodes": [], "edges": []}
+    calls = 0
+
+    class FailedScan:
+        returncode = 1
+
+        async def communicate(self):
+            return b"", b"LLM provider unavailable"
+
+    class CompletedScan:
+        returncode = 0
+
+        async def communicate(self):
+            return b"", b""
+
+    async def fake_create_subprocess_exec(*args, **_kwargs):
+        assert "stdout" in _kwargs and "stderr" in _kwargs
+        assert "env" in _kwargs
+        nonlocal calls
+        calls += 1
+        if "--llm" in args:
+            return FailedScan()
+        output_path = args[args.index("-o") + 1]
+        Path(output_path).write_text(json.dumps(flowgraph), encoding="utf-8")
+        return CompletedScan()
+
+    with (
+        patch.object(breadth_graph, "get_settings", return_value=settings),
+        patch.object(breadth_graph, "breadth_command", return_value=["breadth"]),
+        patch.object(
+            breadth_graph.asyncio,
+            "create_subprocess_exec",
+            new_callable=AsyncMock,
+            side_effect=fake_create_subprocess_exec,
+        ) as create_process,
+    ):
+        result = await breadth_graph.scan_repository("/repo")
+
+    assert result == flowgraph
+    assert calls == 2
+    call = create_process.await_args
+    assert call is not None
+    assert "--llm" not in call.args
 
 
 # ── Ingestion wiring ──────────────────────────────────────────────

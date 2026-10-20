@@ -163,6 +163,56 @@ export async function getLogStats() {
   return api("/api/ingest/logs/stats");
 }
 
+export interface SystemHealth {
+  window_minutes: number;
+  checked_at: string;
+  sampled_events: number;
+  truncated: boolean;
+  status: "errors_observed" | "insufficient_evidence";
+  services: { name: string; synthetic: boolean; events: number; errors: number; warnings: number; last_seen: string }[];
+  evidence: { id: string; service: string; synthetic: boolean; level: string | null; timestamp: string; message: string }[];
+  correlations: { request_id: string; synthetic: boolean; event_ids: string[]; basis: string }[];
+}
+
+export async function getSystemHealth() {
+  return api<SystemHealth>("/api/ingest/logs/health");
+}
+
+export interface MockAnalysis {
+  synthetic: true;
+  request_id: string;
+  mode: "llm" | "evidence_only";
+  notice: string;
+  analysis: string;
+  timeline: { id: string; service: string; level: string | null; timestamp: string; message: string }[];
+}
+
+export async function analyzeMockScenario(event_ids: string[]) {
+  return api<MockAnalysis>("/api/ingest/logs/mock-analysis", {
+    method: "POST",
+    body: JSON.stringify({ event_ids }),
+    timeout: 45_000,
+  });
+}
+
+export interface LiveAnalysis {
+  synthetic: false;
+  service_name: string;
+  mode: "llm" | "evidence_only";
+  notice: string;
+  analysis: string;
+  timeline: MockAnalysis["timeline"];
+  sources: { repo_id: string; file_path: string; content: string; start_line: number; end_line: number; language: string | null }[];
+}
+
+export async function analyzeLiveEvidence(event_ids: string[], repo_id?: string) {
+  return api<LiveAnalysis>("/api/ingest/logs/live-analysis", {
+    method: "POST",
+    body: JSON.stringify({ event_ids, repo_id }),
+    timeout: 75_000,
+  });
+}
+
 export async function getOtelReceiverStatus() {
   return api("/api/ingest/logs/otel/status");
 }
@@ -306,6 +356,18 @@ export async function getRepositories(): Promise<{ ok: boolean; repos: Repositor
   return { ok, repos: data };
 }
 
+export interface RepositoryArchitectureSummary {
+  repo_id: string;
+  repository_name: string;
+  summary: string;
+  chunk_count: number;
+  generated_at: string;
+}
+
+export async function getRepositorySummaries() {
+  return apiList<RepositoryArchitectureSummary>("/api/repos/summaries");
+}
+
 export async function getDependencyGraph(): Promise<{
   ok: boolean;
   nodes?: unknown[];
@@ -313,6 +375,81 @@ export async function getDependencyGraph(): Promise<{
   error?: string;
 }> {
   return api("/api/repos/graph");
+}
+
+export interface KnowledgeGraphEntity {
+  id: string;
+  canonical_name: string;
+  entity_type: string;
+  aliases: string[];
+  repos: string[];
+  deprecated: boolean;
+  description?: string | null;
+}
+
+export interface KnowledgeGraphEdge {
+  id: string;
+  source_entity: string;
+  source_type: string;
+  target_entity: string;
+  target_type: string;
+  edge_type: string;
+  promotion_level: string;
+  confidence: number;
+  incident_count: number;
+  evidence?: Record<string, unknown> | null;
+}
+
+export async function getKnowledgeGraph() {
+  const [entities, edges] = await Promise.all([
+    apiList<KnowledgeGraphEntity>("/api/graph/entities"),
+    apiList<KnowledgeGraphEdge>("/api/graph/edges"),
+  ]);
+  return {
+    ok: entities.ok && edges.ok,
+    entities: entities.data,
+    edges: edges.data,
+    error: entities.error ?? edges.error,
+  };
+}
+
+export interface BreadthNode {
+  id: string;
+  name: string;
+  kind: string;
+  layer?: string;
+  parent?: string;
+  description?: string;
+  aliases?: string[];
+  source?: { file?: string; line?: number; endLine?: number };
+  inputs?: { name: string; type?: string }[];
+  outputs?: { name: string; type?: string }[];
+  metadata?: Record<string, unknown>;
+}
+
+export interface BreadthEdge {
+  id?: string;
+  from: { node: string; port?: string };
+  to: { node: string; port?: string };
+  kind: string;
+  label?: string;
+  protocol?: string;
+  count?: number;
+  metadata?: Record<string, unknown>;
+}
+
+export interface BreadthFlowGraph {
+  version: string;
+  nodes: BreadthNode[];
+  edges: BreadthEdge[];
+  insights?: { severity?: string; title: string; detail?: string; nodes: string[] }[];
+  sources?: { collector: string; target?: string }[];
+}
+
+export async function getBreadthGraph(repoId: string) {
+  return api<{ repo_id: string; scanned_at: string; flowgraph: BreadthFlowGraph }>(
+    `/api/graph/breadth?repo_id=${encodeURIComponent(repoId)}`,
+  );
 }
 
 export async function deleteRepository(repoId: string) {

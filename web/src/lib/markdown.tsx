@@ -35,16 +35,20 @@ export function Markdown({ children, className = "" }: MarkdownProps) {
           <ol className="list-decimal list-inside space-y-1 mb-2 text-[12.5px] text-text-muted">{children}</ol>
         ),
         li: ({ children }) => <li className="leading-relaxed">{children}</li>,
-        code: ({ inline, children }: { inline?: boolean; children?: React.ReactNode }) =>
-          inline ? (
-            <code className="px-1 py-0.5 bg-white/[0.06] border border-white/[0.08] rounded text-[11.5px] font-mono text-accent">
-              {children}
-            </code>
-          ) : (
+        pre: ({ children }) => <>{children}</>,
+        code: ({ className, children, ...props }) => {
+          const text = String(children).replace(/\n$/, "");
+          const isBlock = /language-(\w+)/.exec(className || "") || text.includes("\n");
+          return isBlock ? (
             <pre className="mt-2 mb-2 p-3 bg-[#06060A] border border-white/[0.07] rounded-xl overflow-x-auto">
               <code className="text-[11.5px] font-mono text-text-muted whitespace-pre">{children}</code>
             </pre>
-          ),
+          ) : (
+            <code className="px-1 py-0.5 bg-white/[0.06] border border-white/[0.08] rounded text-[11.5px] font-mono text-accent" {...props}>
+              {children}
+            </code>
+          );
+        },
         blockquote: ({ children }) => (
           <blockquote className="border-l-2 border-accent/40 pl-3 my-2 text-text-dim italic">
             {children}

@@ -161,7 +161,7 @@ class Settings(BaseSettings):
 
     # ── Google Gemini ────────────────────────────────────────────
     GEMINI_API_KEY: str = ""
-    GEMINI_MODEL: str = "gemini-2.5-flash"
+    GEMINI_MODEL: str = "gemini-3.8-flash"
 
     # ── OpenTelemetry Log Receiver (OTLP/HTTP) ─────────────────
     OTEL_LOGS_RECEIVER_ENABLED: bool = True
@@ -240,6 +240,8 @@ class Settings(BaseSettings):
     # Path to the Breadth CLI: a command on PATH or a breadth.mjs file.
     BREADTH_BIN: str = "breadth"
     BREADTH_SCAN_TIMEOUT_SECONDS: int = 300
+    # Use the selected RootOps LLM for Breadth node summaries during scans.
+    BREADTH_LLM_ENABLED: bool = True
 
     # ── Ollama override ──────────────────────────────────────────
     # On ≤8 GB the default backend is *not* Ollama (it's too slow on CPU).

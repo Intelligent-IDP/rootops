@@ -7,6 +7,7 @@ Includes causation confirmation and entity alias management.
 
 from __future__ import annotations
 
+import uuid
 from datetime import UTC
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
@@ -21,6 +22,26 @@ from app.services.causation_service import (
 )
 
 router = APIRouter(prefix="/api/graph", tags=["graph"])
+
+
+# ── Detailed Breadth graph ────────────────────────────────────────
+
+@router.get("/breadth")
+async def get_breadth_graph(
+    repo_id: uuid.UUID = Query(..., description="Repository UUID"),
+    session=Depends(get_db),
+):
+    """Return the latest unrolled Breadth flowgraph for a repository."""
+    from app.models.breadth_graph_snapshot import BreadthGraphSnapshot
+
+    snapshot = await session.get(BreadthGraphSnapshot, repo_id)
+    if snapshot is None:
+        raise HTTPException(404, f"No Breadth graph snapshot for repository {repo_id}")
+    return {
+        "repo_id": str(snapshot.repo_id),
+        "scanned_at": snapshot.scanned_at.isoformat(),
+        "flowgraph": snapshot.flowgraph,
+    }
 
 
 # ── Edges ─────────────────────────────────────────────────────────
